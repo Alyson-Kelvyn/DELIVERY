@@ -1,0 +1,38 @@
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string;
+  available: boolean;
+  category: "marmitas" | "bebidas" | "sobremesas" | "acompanhamentos";
+  created_at: string;
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface Customer {
+  name: string;
+  phone: string;
+  address: string;
+  paymentMethod: "cartao" | "pix" | "dinheiro";
+  changeFor?: number;
+}
+
+export interface Order {
+  id: string;
+  customer: Customer;
+  items: CartItem[];
+  total: number;
+  status: "pendente" | "confirmado" | "entregue";
+  created_at: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+}
