@@ -21,21 +21,20 @@ export const sendOrderToWhatsApp = (order: Order) => {
   const numberAndNeighborhood = addressParts[1] || "";
 
   let message = `🔥 *NOVO PEDIDO - CHURRASCARIA* 🔥\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   // Informações do cliente
   message += `👤 *INFORMAÇÕES DO CLIENTE*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
   message += `📋 *Nome:* ${order.customer.name}\n`;
   message += `📱 *Telefone:* ${order.customer.phone}\n`;
   message += `📍 *Endereço:*\n`;
-  message += `   Rua: ${street}\n`;
-  message += `   ${numberAndNeighborhood}\n\n`;
+  message += `   🏠 *Rua:* ${street}\n`;
+  message += `   🏢 *Número:* ${numberAndNeighborhood.split(" - ")[0] || ""}\n`;
+  message += `   🏘️ *Bairro:* ${
+    numberAndNeighborhood.split(" - ")[1] || numberAndNeighborhood
+  }\n\n`;
 
   // Informações de pagamento
   message += `💳 *FORMA DE PAGAMENTO*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-
   const paymentMethod = order.customer.paymentMethod;
   const paymentEmoji =
     paymentMethod === "pix" ? "💚" : paymentMethod === "dinheiro" ? "💵" : "💳";
@@ -55,8 +54,6 @@ export const sendOrderToWhatsApp = (order: Order) => {
 
   // Itens do pedido
   message += `🍽️ *ITENS DO PEDIDO*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-
   order.items.forEach((item, index) => {
     const itemTotal = (item.product.price * item.quantity).toFixed(2);
     message += `${index + 1}. ${item.quantity}x ${item.product.name}\n`;
@@ -65,18 +62,12 @@ export const sendOrderToWhatsApp = (order: Order) => {
 
   // Total e informações do pedido
   message += `💰 *RESUMO DO PEDIDO*\n`;
-  message += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
   message += `📦 *Quantidade de itens:* ${order.items.length}\n`;
   message += `💵 *Total:* R$ ${order.total.toFixed(2)}\n`;
   message += `📅 *Data:* ${formattedDate}\n`;
   message += `⏰ *Hora:* ${formattedTime}\n\n`;
 
-  message += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-  message += `🎯 *ID do Pedido:* ${order.id.slice(0, 8).toUpperCase()}\n`;
-  message += `📊 *Status:* ⏳ Pendente\n\n`;
-
-  message += `✅ *Pedido recebido com sucesso!*\n`;
-  message += `📞 Entraremos em contato em breve para confirmar a entrega.`;
+  message += `✅ *Pedido recebido com sucesso!*`;
 
   const encodedMessage = encodeURIComponent(message);
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
