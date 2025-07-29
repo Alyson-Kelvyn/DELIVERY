@@ -31,6 +31,30 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [showOrderSummary, setShowOrderSummary] = useState(false);
+
+  // Função para validar se todos os campos obrigatórios estão preenchidos
+  const isFormValid = () => {
+    return (
+      customer.name.trim() !== "" &&
+      customer.phone.trim() !== "" &&
+      customer.street.trim() !== "" &&
+      customer.number.trim() !== "" &&
+      customer.neighborhood.trim() !== "" &&
+      (customer.paymentMethod !== "dinheiro" || customer.changeFor)
+    );
+  };
+
+  const handleFinalizeClick = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!isFormValid()) {
+      alert("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    setShowOrderSummary(true);
+  };
 
   const formatPhoneNumber = (value: string) => {
     // Remove tudo que não é dígito
@@ -60,13 +84,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !customer.name ||
-      !customer.phone ||
-      !customer.street ||
-      !customer.number ||
-      !customer.neighborhood
-    ) {
+    if (!isFormValid()) {
       alert("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
@@ -346,42 +364,173 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
             )}
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="font-semibold text-gray-800 mb-3">
-              Resumo do Pedido
-            </h3>
-            <div className="space-y-2">
-              {state.items.map((item) => (
-                <div
-                  key={item.product.id}
-                  className="flex justify-between text-sm"
-                >
-                  <span>
-                    {item.quantity}x {item.product.name}
-                  </span>
-                  <span>
-                    R$ {(item.product.price * item.quantity).toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="border-t pt-2 mt-3">
-              <div className="flex justify-between font-bold">
-                <span>Total:</span>
-                <span className="text-red-600">
-                  R$ {state.total.toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-
           <button
-            type="submit"
-            disabled={isSubmitting}
+            type="button"
+            onClick={handleFinalizeClick}
+            disabled={!isFormValid()}
             className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white py-4 rounded-lg font-semibold transition-colors"
           >
-            {isSubmitting ? "Enviando..." : "Finalizar Pedido"}
+            Finalizar Pedido
           </button>
+
+          {showOrderSummary && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-gray-800">
+                      Confirmar Pedido
+                    </h2>
+                    <button
+                      onClick={() => setShowOrderSummary(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                    <h3 className="font-bold text-gray-800 mb-4 text-lg flex items-center gap-2">
+                      📋 Resumo do Pedido
+                    </h3>
+
+                    {/* Informações do Cliente */}
+                    <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        👤 Dados do Cliente
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Nome:</span>
+                          <span className="font-medium">
+                            {customer.name || "—"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Telefone:</span>
+                          <span className="font-medium">
+                            {customer.phone || "—"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Endereço:</span>
+                          <span className="font-medium text-right">
+                            {customer.street &&
+                            customer.number &&
+                            customer.neighborhood
+                              ? `${customer.street}, ${customer.number} - ${customer.neighborhood}`
+                              : "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Forma de Pagamento */}
+                    <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        💳 Forma de Pagamento
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        {customer.paymentMethod === "pix" && (
+                          <span className="text-green-600">💚</span>
+                        )}
+                        {customer.paymentMethod === "dinheiro" && (
+                          <span className="text-yellow-600">💵</span>
+                        )}
+                        {customer.paymentMethod === "cartao" && (
+                          <span className="text-blue-600">💳</span>
+                        )}
+                        <span className="font-medium capitalize">
+                          {customer.paymentMethod === "pix"
+                            ? "PIX"
+                            : customer.paymentMethod === "dinheiro"
+                            ? "Dinheiro"
+                            : customer.paymentMethod === "cartao"
+                            ? "Cartão"
+                            : "—"}
+                        </span>
+                        {customer.paymentMethod === "dinheiro" &&
+                          customer.changeFor && (
+                            <span className="text-sm text-gray-600 ml-2">
+                              (Troco para R$ {customer.changeFor.toFixed(2)})
+                            </span>
+                          )}
+                      </div>
+                    </div>
+
+                    {/* Itens do Pedido */}
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        🍽️ Itens do Pedido
+                      </h4>
+                      <div className="space-y-3">
+                        {state.items.map((item) => (
+                          <div
+                            key={item.product.id}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <span className="text-red-600 text-lg">🍖</span>
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-800">
+                                  {item.product.name}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {item.quantity}x R${" "}
+                                  {item.product.price.toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-gray-800">
+                                R${" "}
+                                {(item.product.price * item.quantity).toFixed(
+                                  2
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Total */}
+                    <div className="border-t pt-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-semibold text-gray-800">
+                          Total do Pedido:
+                        </span>
+                        <span className="text-2xl font-bold text-red-600">
+                          R$ {state.total.toFixed(2)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-2 text-center">
+                        Pedido será enviado para o WhatsApp da churrascaria
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      onClick={() => setShowOrderSummary(false)}
+                      className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-semibold transition-colors"
+                    >
+                      Voltar
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white py-3 rounded-lg font-semibold transition-colors"
+                    >
+                      {isSubmitting ? "Enviando..." : "Confirmar Pedido"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>
