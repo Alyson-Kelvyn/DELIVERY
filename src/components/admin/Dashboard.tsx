@@ -7,7 +7,7 @@ interface DashboardStats {
   monthlyRevenue: number;
   dailyOrders: number;
   monthlyOrders: number;
-  topProducts: Array<{ name: string; quantity: number; revenue: number }>;
+  topProducts: Array<{ name: string; quantity: number }>;
 }
 
 const Dashboard: React.FC = () => {
@@ -49,11 +49,11 @@ const Dashboard: React.FC = () => {
           dailyOrders: 24,
           monthlyOrders: 187,
           topProducts: [
-            { name: "Marmita de Picanha", quantity: 15, revenue: 283.5 },
-            { name: "Marmita de Costela", quantity: 12, revenue: 238.8 },
-            { name: "Marmita de Maminha", quantity: 10, revenue: 169.0 },
-            { name: "Marmita de Alcatra", quantity: 8, revenue: 143.2 },
-            { name: "Marmita de Fraldinha", quantity: 6, revenue: 95.4 },
+            { name: "Marmita de Picanha", quantity: 15 },
+            { name: "Marmita de Costela", quantity: 12 },
+            { name: "Marmita de Maminha", quantity: 10 },
+            { name: "Marmita de Alcatra", quantity: 8 },
+            { name: "Marmita de Fraldinha", quantity: 6 },
           ],
         });
       } else {
@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
 
         // Calculate top products
         const productStats: {
-          [key: string]: { quantity: number; revenue: number };
+          [key: string]: { quantity: number };
         } = {};
 
         deliveredOrders.forEach((order) => {
@@ -86,17 +86,15 @@ const Dashboard: React.FC = () => {
             }) => {
               const productName = item.product.name;
               if (!productStats[productName]) {
-                productStats[productName] = { quantity: 0, revenue: 0 };
+                productStats[productName] = { quantity: 0 };
               }
               productStats[productName].quantity += item.quantity;
-              productStats[productName].revenue +=
-                item.product.price * item.quantity;
             }
           );
         });
 
         const topProducts = Object.entries(productStats)
-          .map(([name, stats]) => ({ name, ...stats }))
+          .map(([name, stats]) => ({ name, quantity: stats.quantity }))
           .sort((a, b) => b.quantity - a.quantity)
           .slice(0, 5);
 
@@ -207,9 +205,6 @@ const Dashboard: React.FC = () => {
                   <th className="text-center py-3 px-4 font-semibold text-gray-700">
                     Quantidade
                   </th>
-                  <th className="text-right py-3 px-4 font-semibold text-gray-700">
-                    Receita
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -223,9 +218,6 @@ const Dashboard: React.FC = () => {
                     </td>
                     <td className="py-3 px-4 text-center text-gray-600">
                       {product.quantity}
-                    </td>
-                    <td className="py-3 px-4 text-right text-green-600 font-semibold">
-                      R$ {product.revenue.toFixed(2)}
                     </td>
                   </tr>
                 ))}
