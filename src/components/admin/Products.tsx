@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit2, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Plus, Edit2, Eye, EyeOff, Trash2, X } from "lucide-react";
 import { Product } from "../../types";
 import { supabase } from "../../lib/supabase";
+import Notification from "./Notification";
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,16 +15,42 @@ const Products: React.FC = () => {
     price: 0,
     image_url: "",
     available: true,
+    stock: undefined as number | undefined,
+    useStock: false, // Controla se o produto usa controle de estoque
     category: "marmitas" as
       | "marmitas"
       | "bebidas"
       | "sobremesas"
       | "acompanhamentos",
   });
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [editingStockProduct, setEditingStockProduct] =
+    useState<Product | null>(null);
+  const [newStockValue, setNewStockValue] = useState("");
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error" | "warning" | "info";
+    isVisible: boolean;
+  }>({
+    message: "",
+    type: "info",
+    isVisible: false,
+  });
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && showStockModal) {
+        closeStockModal();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [showStockModal]);
 
   const fetchProducts = async () => {
     try {
@@ -34,38 +61,51 @@ const Products: React.FC = () => {
 
       if (error) {
         console.error("Error fetching products:", error);
-        // Demo data
-        setProducts([
-          {
-            id: "1",
-            name: "Marmita de Picanha",
-            description:
-              "Deliciosa picanha grelhada com arroz, feijão, farofa e vinagrete",
-            price: 18.9,
-            image_url:
-              "https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            category: "marmitas",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "2",
-            name: "Marmita de Maminha",
-            description:
-              "Suculenta maminha na brasa com acompanhamentos tradicionais",
-            price: 16.9,
-            image_url:
-              "https://images.pexels.com/photos/2491273/pexels-photo-2491273.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            category: "marmitas",
-            created_at: new Date().toISOString(),
-          },
-        ]);
+        alert("Erro ao buscar produtos: " + error.message);
       } else {
-        setProducts(data || []);
+        // Verificar produtos com estoque zero e torná-los indisponíveis
+        const productsWithStockCheck = data || [];
+        const productsToUpdate = productsWithStockCheck.filter(
+          (product) =>
+            product.stock !== null && product.stock <= 0 && product.available
+        );
+
+        if (productsToUpdate.length > 0) {
+          // Atualizar produtos com estoque zero para indisponível
+          const { error: updateError } = await supabase
+            .from("products")
+            .update({ available: false })
+            .in(
+              "id",
+              productsToUpdate.map((p) => p.id)
+            );
+
+          if (updateError) {
+            console.error("Error updating products availability:", updateError);
+          } else {
+            console.log(
+              `${productsToUpdate.length} produtos com estoque zero foram marcados como indisponíveis`
+            );
+          }
+
+          // Buscar produtos novamente para ter os dados atualizados
+          const { data: updatedData, error: refetchError } = await supabase
+            .from("products")
+            .select("*")
+            .order("name");
+
+          if (refetchError) {
+            console.error("Error refetching products:", refetchError);
+          } else {
+            setProducts(updatedData || []);
+          }
+        } else {
+          setProducts(productsWithStockCheck);
+        }
       }
     } catch (error) {
       console.error("Error:", error);
+      alert("Erro inesperado ao buscar produtos: " + (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -75,19 +115,40 @@ const Products: React.FC = () => {
     e.preventDefault();
 
     try {
+      // Verificar se o usuário está autenticado
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        alert("Você precisa estar logado para criar produtos.");
+        return;
+      }
+
+      // Preparar dados do produto (removendo useStock que é apenas para UI)
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        image_url: formData.image_url,
+        available: formData.available,
+        category: formData.category,
+        stock: formData.useStock ? formData.stock : null, // Se não usar estoque, define como null
+      };
+
       if (editingProduct) {
         // Update product
         const { error } = await supabase
           .from("products")
-          .update(formData)
+          .update(productData)
           .eq("id", editingProduct.id);
 
         if (error) {
           console.error("Error updating product:", error);
+          alert("Erro ao atualizar produto: " + error.message);
         } else {
           setProducts(
             products.map((p) =>
-              p.id === editingProduct.id ? { ...p, ...formData } : p
+              p.id === editingProduct.id ? { ...p, ...productData } : p
             )
           );
         }
@@ -95,7 +156,7 @@ const Products: React.FC = () => {
         // Create new product
         const newProduct = {
           id: crypto.randomUUID(),
-          ...formData,
+          ...productData,
           created_at: new Date().toISOString(),
         };
 
@@ -103,6 +164,7 @@ const Products: React.FC = () => {
 
         if (error) {
           console.error("Error creating product:", error);
+          alert("Erro ao criar produto: " + error.message);
         } else {
           setProducts([...products, newProduct]);
         }
@@ -111,6 +173,7 @@ const Products: React.FC = () => {
       resetForm();
     } catch (error) {
       console.error("Error:", error);
+      alert("Erro inesperado: " + (error as Error).message);
     }
   };
 
@@ -154,6 +217,78 @@ const Products: React.FC = () => {
     }
   };
 
+  const updateStock = async (product: Product, newStock: number) => {
+    try {
+      const updateData: any = { stock: newStock };
+
+      // Se o estoque chegou a zero e o produto tem controle de estoque, torná-lo indisponível
+      if (newStock <= 0 && product.stock !== null) {
+        updateData.available = false;
+      }
+
+      // Se o estoque foi reposto e o produto estava indisponível por falta de estoque, reativá-lo
+      if (
+        newStock > 0 &&
+        product.stock !== null &&
+        !product.available &&
+        product.stock <= 0
+      ) {
+        updateData.available = true;
+      }
+
+      const { error } = await supabase
+        .from("products")
+        .update(updateData)
+        .eq("id", product.id);
+
+      if (error) {
+        console.error("Error updating stock:", error);
+        showNotification(
+          "Erro ao atualizar estoque: " + error.message,
+          "error"
+        );
+      } else {
+        setProducts(
+          products.map((p) =>
+            p.id === product.id
+              ? {
+                  ...p,
+                  stock: newStock,
+                  available:
+                    updateData.available !== undefined
+                      ? updateData.available
+                      : p.available,
+                }
+              : p
+          )
+        );
+
+        if (newStock <= 0 && product.stock !== null) {
+          showNotification(
+            `Produto "${product.name}" ficou indisponível por falta de estoque.`,
+            "warning"
+          );
+        } else if (
+          newStock > 0 &&
+          product.stock !== null &&
+          !product.available &&
+          product.stock <= 0
+        ) {
+          showNotification(
+            `Produto "${product.name}" foi reativado! Estoque reposto.`,
+            "success"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      showNotification(
+        "Erro inesperado ao atualizar estoque: " + (error as Error).message,
+        "error"
+      );
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -161,6 +296,8 @@ const Products: React.FC = () => {
       price: 0,
       image_url: "",
       available: true,
+      stock: undefined,
+      useStock: false,
       category: "marmitas",
     });
     setEditingProduct(null);
@@ -174,6 +311,8 @@ const Products: React.FC = () => {
       price: product.price,
       image_url: product.image_url,
       available: product.available,
+      stock: product.stock,
+      useStock: product.stock !== null && product.stock !== undefined, // Ativa se o produto tem estoque
       category: product.category,
     });
     setEditingProduct(product);
@@ -208,6 +347,72 @@ const Products: React.FC = () => {
       default:
         return "Produto";
     }
+  };
+
+  const openStockModal = (product: Product) => {
+    setEditingStockProduct(product);
+    setNewStockValue(product.stock?.toString() || "0");
+    setShowStockModal(true);
+  };
+
+  const closeStockModal = () => {
+    setShowStockModal(false);
+    setEditingStockProduct(null);
+    setNewStockValue("");
+  };
+
+  const handleStockSubmit = async () => {
+    if (!editingStockProduct) return;
+
+    const stockValue = parseInt(newStockValue);
+    if (isNaN(stockValue) || stockValue < 0) {
+      showNotification(
+        "Por favor, insira um número válido (0 ou maior).",
+        "error"
+      );
+      return;
+    }
+
+    await updateStock(editingStockProduct, stockValue);
+    closeStockModal();
+  };
+
+  const handleStockInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permitir apenas números e string vazia
+    if (value === "" || /^\d+$/.test(value)) {
+      setNewStockValue(value);
+    }
+  };
+
+  const handleStockInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (
+        newStockValue !== "" &&
+        !isNaN(parseInt(newStockValue)) &&
+        parseInt(newStockValue) >= 0
+      ) {
+        handleStockSubmit();
+      }
+    }
+  };
+
+  const showNotification = (
+    message: string,
+    type: "success" | "error" | "warning" | "info" = "info"
+  ) => {
+    setNotification({
+      message,
+      type,
+      isVisible: true,
+    });
+  };
+
+  const hideNotification = () => {
+    setNotification((prev) => ({ ...prev, isVisible: false }));
   };
 
   if (loading) {
@@ -362,6 +567,54 @@ const Products: React.FC = () => {
                 </label>
               </div>
 
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="useStock"
+                  checked={formData.useStock}
+                  onChange={(e) =>
+                    setFormData({ ...formData, useStock: e.target.checked })
+                  }
+                  className="mr-2"
+                />
+                <label
+                  htmlFor="useStock"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Controle de Estoque
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 -mt-2 mb-2">
+                {formData.useStock
+                  ? "O produto será removido automaticamente quando o estoque chegar a zero"
+                  : "O produto ficará disponível até ser marcado como indisponível manualmente"}
+              </p>
+
+              {formData.useStock && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Quantidade em Estoque
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    required={formData.useStock}
+                    value={formData.stock || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stock: parseInt(e.target.value) || undefined,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="Ex: 50"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Quantidade disponível em estoque
+                  </p>
+                </div>
+              )}
+
               <div className="flex space-x-3">
                 <button
                   type="submit"
@@ -405,10 +658,16 @@ const Products: React.FC = () => {
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${
                     product.available
                       ? "bg-green-100 text-green-800 border border-green-200"
+                      : product.stock !== null && product.stock <= 0
+                      ? "bg-red-100 text-red-800 border border-red-200"
                       : "bg-red-100 text-red-800 border border-red-200"
                   }`}
                 >
-                  {product.available ? "✓ Disponível" : "✗ Indisponível"}
+                  {product.available
+                    ? "✓ Disponível"
+                    : product.stock !== null && product.stock <= 0
+                    ? "✗ Sem Estoque"
+                    : "✗ Indisponível"}
                 </span>
               </div>
             </div>
@@ -438,6 +697,30 @@ const Products: React.FC = () => {
                 <span className="text-2xl font-bold text-red-600">
                   R$ {product.price.toFixed(2)}
                 </span>
+                {/* Exibir estoque se o produto tiver controle de estoque */}
+                {product.stock !== null && product.stock !== undefined && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">📦</span>
+                    <span
+                      className={`text-sm font-medium ${
+                        product.stock > 0
+                          ? product.stock <= 5
+                            ? "text-orange-600"
+                            : "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {product.stock} un
+                    </span>
+                    <button
+                      onClick={() => openStockModal(product)}
+                      className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-600 px-2 py-1 rounded transition-colors"
+                      title="Editar estoque"
+                    >
+                      ✏️
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Botões de ação */}
@@ -495,6 +778,102 @@ const Products: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Modal de Edição de Estoque */}
+      {showStockModal && editingStockProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Editar Estoque
+              </h3>
+              <button
+                onClick={closeStockModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-gray-600 mb-2">
+                Produto:{" "}
+                <span className="font-semibold">
+                  {editingStockProduct.name}
+                </span>
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                Estoque atual:{" "}
+                <span className="font-medium">
+                  {editingStockProduct.stock || 0} unidades
+                </span>
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nova quantidade de estoque:
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={newStockValue}
+                onChange={handleStockInputChange}
+                onKeyDown={handleStockInputKeyDown}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent ${
+                  newStockValue === "" || parseInt(newStockValue) >= 0
+                    ? "border-gray-300"
+                    : "border-red-300 bg-red-50"
+                }`}
+                placeholder="Digite a nova quantidade"
+                autoFocus
+              />
+              {newStockValue !== "" &&
+                (isNaN(parseInt(newStockValue)) ||
+                  parseInt(newStockValue) < 0) && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Por favor, insira um número válido (0 ou maior).
+                  </p>
+                )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={closeStockModal}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleStockSubmit}
+                disabled={
+                  newStockValue === "" ||
+                  isNaN(parseInt(newStockValue)) ||
+                  parseInt(newStockValue) < 0
+                }
+                className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  newStockValue === "" ||
+                  isNaN(parseInt(newStockValue)) ||
+                  parseInt(newStockValue) < 0
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700 text-white"
+                }`}
+              >
+                Atualizar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Componente de Notificação */}
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        isVisible={notification.isVisible}
+        onClose={hideNotification}
+        duration={4000}
+      />
     </div>
   );
 };

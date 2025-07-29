@@ -40,6 +40,7 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
+            stock: 15,
             category: "marmitas",
             created_at: new Date().toISOString(),
           },
@@ -52,6 +53,7 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/2491273/pexels-photo-2491273.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
+            stock: 8,
             category: "marmitas",
             created_at: new Date().toISOString(),
           },
@@ -64,6 +66,7 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
+            stock: 3,
             category: "marmitas",
             created_at: new Date().toISOString(),
           },
@@ -75,6 +78,7 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/1251198/pexels-photo-1251198.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
+            stock: 0,
             category: "marmitas",
             created_at: new Date().toISOString(),
           },
@@ -86,6 +90,7 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/248444/pexels-photo-248444.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
+            stock: null,
             category: "marmitas",
             created_at: new Date().toISOString(),
           },
@@ -98,6 +103,7 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/1409050/pexels-photo-1409050.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
+            stock: 12,
             category: "marmitas",
             created_at: new Date().toISOString(),
           },
@@ -109,6 +115,7 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/1627763/pexels-photo-1627763.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
+            stock: 25,
             category: "bebidas",
             created_at: new Date().toISOString(),
           },
@@ -120,12 +127,21 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/162553/pexels-photo-162553.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
+            stock: 0,
             category: "sobremesas",
             created_at: new Date().toISOString(),
           },
         ]);
       } else {
-        setProducts(data || []);
+        // Filtrar produtos que estão disponíveis E (não têm controle de estoque OU têm estoque > 0)
+        const filteredData = (data || []).filter(
+          (product) =>
+            product.available &&
+            (product.stock === null ||
+              product.stock === undefined ||
+              product.stock > 0)
+        );
+        setProducts(filteredData);
       }
     } catch (error) {
       console.error("Error:", error);

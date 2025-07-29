@@ -13,6 +13,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const cartItem = state.items.find((item) => item.product.id === product.id);
   const quantity = cartItem?.quantity || 0;
 
+  // Verificar se o produto tem controle de estoque
+  const hasStockControl = product.stock !== null && product.stock !== undefined;
+  const availableStock = hasStockControl ? product.stock : null;
+  const canAddMore =
+    !hasStockControl || (availableStock !== null && quantity < availableStock);
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "marmitas":
@@ -43,11 +49,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
+  const getStockColor = (stock: number) => {
+    if (stock > 5) return "text-green-600";
+    if (stock > 0) return "text-orange-600";
+    return "text-red-600";
+  };
+
+  const getStockText = (stock: number) => {
+    return `${stock} unidades`;
+  };
+
   const addToCart = () => {
+    if (hasStockControl && availableStock !== null && availableStock <= 0) {
+      return; // Não permitir adicionar se não há estoque
+    }
     dispatch({ type: "ADD_ITEM", payload: product });
   };
 
   const updateQuantity = (newQuantity: number) => {
+    // Verificar se não está tentando adicionar mais do que o estoque disponível
+    if (
+      hasStockControl &&
+      availableStock !== null &&
+      newQuantity > availableStock
+    ) {
+      return; // Não permitir adicionar mais do que o estoque
+    }
+
     if (newQuantity === 0) {
       dispatch({ type: "REMOVE_ITEM", payload: product.id });
     } else {
@@ -70,6 +98,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <span className="mr-1">{getCategoryIcon(product.category)}</span>
           {getCategoryLabel(product.category)}
         </div>
+
+        {/* Badge de Estoque */}
+        {hasStockControl && (
+          <div className="absolute top-2 right-2 bg-white bg-opacity-90 px-2 py-1 rounded-full text-xs font-medium flex items-center">
+            <span className="mr-1">📦</span>
+            <span className={getStockColor(availableStock || 0)}>
+              {availableStock} un
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="p-4">
@@ -86,10 +124,27 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {quantity === 0 ? (
             <button
               onClick={addToCart}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              disabled={
+                hasStockControl &&
+                availableStock !== null &&
+                availableStock <= 0
+              }
+              className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+                hasStockControl &&
+                availableStock !== null &&
+                availableStock <= 0
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              }`}
             >
               <Plus className="h-4 w-4" />
-              <span>Adicionar</span>
+              <span>
+                {hasStockControl &&
+                availableStock !== null &&
+                availableStock <= 0
+                  ? "Sem estoque"
+                  : "Adicionar"}
+              </span>
             </button>
           ) : (
             <div className="flex items-center space-x-3">
@@ -102,7 +157,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <span className="font-semibold text-lg">{quantity}</span>
               <button
                 onClick={() => updateQuantity(quantity + 1)}
-                className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-colors"
+                disabled={
+                  hasStockControl &&
+                  availableStock !== null &&
+                  quantity >= availableStock
+                }
+                className={`p-2 rounded-full transition-colors ${
+                  hasStockControl &&
+                  availableStock !== null &&
+                  quantity >= availableStock
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-red-600 hover:bg-red-700 text-white"
+                }`}
               >
                 <Plus className="h-4 w-4" />
               </button>

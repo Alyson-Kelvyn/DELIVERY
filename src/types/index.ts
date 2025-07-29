@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   image_url: string;
   available: boolean;
+  stock?: number; // Quantidade em estoque (opcional)
   category: "marmitas" | "bebidas" | "sobremesas" | "acompanhamentos";
   created_at: string;
 }

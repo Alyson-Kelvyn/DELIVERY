@@ -13,6 +13,7 @@ import { useCart } from "../context/CartContext";
 import { Customer, Order } from "../types";
 import { sendOrderToWhatsApp } from "../utils/whatsapp";
 import { supabase } from "../lib/supabase";
+import { CartItem, Product } from "../types";
 
 interface OrderFormProps {
   onBack: () => void;
@@ -94,6 +95,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
       return;
     }
 
+    // Verificar disponibilidade de estoque
+    const stockCheck = checkStockAvailability(state.items);
+    if (!stockCheck.available) {
+      alert(stockCheck.message);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -131,6 +139,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
       // Send to WhatsApp
       sendOrderToWhatsApp(order);
 
+      // Reduce stock
+      await reduceStock(state.items);
+
       // Clear cart
       dispatch({ type: "CLEAR_CART" });
 
@@ -141,6 +152,83 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const reduceStock = async (items: CartItem[]) => {
+    try {
+      console.log("🔄 Reduzindo estoque dos produtos...");
+
+      // Agrupar itens por produto para calcular quantidade total
+      const stockUpdates = items.reduce((acc, item) => {
+        const productId = item.product.id;
+        if (acc[productId]) {
+          acc[productId].quantity += item.quantity;
+        } else {
+          acc[productId] = {
+            product: item.product,
+            quantity: item.quantity,
+          };
+        }
+        return acc;
+      }, {} as Record<string, { product: Product; quantity: number }>);
+
+      // Atualizar estoque para cada produto
+      for (const productId in stockUpdates) {
+        const { product, quantity } = stockUpdates[productId];
+
+        // Só reduzir estoque se o produto tem controle de estoque
+        if (product.stock !== null && product.stock !== undefined) {
+          const newStock = Math.max(0, product.stock - quantity);
+
+          console.log(
+            `📦 ${product.name}: ${product.stock} → ${newStock} (${quantity} vendidos)`
+          );
+
+          const { error } = await supabase
+            .from("products")
+            .update({ stock: newStock })
+            .eq("id", productId);
+
+          if (error) {
+            console.error(
+              `❌ Erro ao atualizar estoque de "${product.name}":`,
+              error
+            );
+          } else {
+            console.log(
+              `✅ Estoque de "${product.name}" atualizado com sucesso`
+            );
+          }
+        } else {
+          console.log(`ℹ️ "${product.name}" não tem controle de estoque`);
+        }
+      }
+
+      console.log("✅ Redução de estoque concluída!");
+    } catch (error) {
+      console.error("❌ Erro ao reduzir estoque:", error);
+    }
+  };
+
+  const checkStockAvailability = (
+    items: CartItem[]
+  ): { available: boolean; message?: string } => {
+    for (const item of items) {
+      const product = item.product;
+
+      // Verificar se o produto tem controle de estoque
+      if (product.stock !== null && product.stock !== undefined) {
+        // Verificar se há estoque suficiente
+        if (product.stock < item.quantity) {
+          return {
+            available: false,
+            message: `Produto "${product.name}" não tem estoque suficiente. Disponível: ${product.stock}, Solicitado: ${item.quantity}`,
+          };
+        }
+      }
+    }
+
+    return { available: true };
   };
 
   if (orderSuccess) {
