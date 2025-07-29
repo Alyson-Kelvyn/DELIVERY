@@ -17,14 +17,16 @@ export interface CartItem {
 export interface Customer {
   name: string;
   phone: string;
-  address: string;
+  street: string;
+  number: string;
+  neighborhood: string;
   paymentMethod: "cartao" | "pix" | "dinheiro";
   changeFor?: number;
 }
 
 export interface Order {
   id: string;
-  customer: Customer;
+  customer: Customer & { address: string };
   items: CartItem[];
   total: number;
   status: "pendente" | "confirmado" | "entregue";

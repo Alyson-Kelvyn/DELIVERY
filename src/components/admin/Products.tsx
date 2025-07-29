@@ -224,11 +224,14 @@ const Products: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex items-center justify-center space-x-3 mb-6">
+        <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800">Produtos</h1>
           <p className="text-gray-600">Gerencie seu cardápio</p>
         </div>
+      </div>
+
+      <div className="flex justify-center mb-6">
         <button
           onClick={() => setShowForm(true)}
           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
@@ -320,17 +323,25 @@ const Products: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  URL da Imagem
+                  Imagem do Produto
                 </label>
                 <input
-                  type="url"
-                  required
-                  value={formData.image_url}
-                  onChange={(e) =>
-                    setFormData({ ...formData, image_url: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Para demo, vamos usar uma URL temporária
+                      // Em produção, você faria upload para um serviço como Supabase Storage
+                      const imageUrl = URL.createObjectURL(file);
+                      setFormData({ ...formData, image_url: imageUrl });
+                    }
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Selecione uma imagem do seu computador
+                </p>
               </div>
 
               <div className="flex items-center">
@@ -371,85 +382,100 @@ const Products: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <div
             key={product.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group"
           >
-            <div className="flex">
-              <div className="w-32 h-32 flex-shrink-0">
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
+            {/* Imagem do produto */}
+            <div className="relative h-48 bg-gray-100">
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src =
+                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d1d5db'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E";
+                }}
+              />
+              {/* Status de disponibilidade */}
+              <div className="absolute top-3 right-3">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    product.available
+                      ? "bg-green-100 text-green-800 border border-green-200"
+                      : "bg-red-100 text-red-800 border border-red-200"
+                  }`}
+                >
+                  {product.available ? "✓ Disponível" : "✗ Indisponível"}
+                </span>
               </div>
-              <div className="flex-1 p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="font-bold text-gray-800">{product.name}</h3>
-                    <div className="flex items-center mt-1">
-                      <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full flex items-center">
-                        <span className="mr-1">
-                          {getCategoryIcon(product.category)}
-                        </span>
-                        {getCategoryLabel(product.category)}
-                      </span>
-                    </div>
-                  </div>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+            </div>
+
+            {/* Conteúdo do card */}
+            <div className="p-6">
+              {/* Categoria */}
+              <div className="flex items-center mb-3">
+                <span className="text-sm bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium flex items-center gap-1">
+                  <span>{getCategoryIcon(product.category)}</span>
+                  {getCategoryLabel(product.category)}
+                </span>
+              </div>
+
+              {/* Nome do produto */}
+              <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-1">
+                {product.name}
+              </h3>
+
+              {/* Descrição */}
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                {product.description}
+              </p>
+
+              {/* Preço */}
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-2xl font-bold text-red-600">
+                  R$ {product.price.toFixed(2)}
+                </span>
+              </div>
+
+              {/* Botões de ação */}
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => toggleAvailability(product)}
+                    className={`p-2 rounded-lg transition-colors ${
                       product.available
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                        ? "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                        : "bg-green-100 hover:bg-green-200 text-green-600"
                     }`}
+                    title={
+                      product.available
+                        ? "Tornar indisponível"
+                        : "Tornar disponível"
+                    }
                   >
-                    {product.available ? "Disponível" : "Indisponível"}
-                  </span>
-                </div>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                  {product.description}
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-red-600">
-                    R$ {product.price.toFixed(2)}
-                  </span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => toggleAvailability(product)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        product.available
-                          ? "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                          : "bg-green-100 hover:bg-green-200 text-green-600"
-                      }`}
-                      title={
-                        product.available
-                          ? "Tornar indisponível"
-                          : "Tornar disponível"
-                      }
-                    >
-                      {product.available ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => startEdit(product)}
-                      className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
-                      title="Editar produto"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => deleteProduct(product.id)}
-                      className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
-                      title="Excluir produto"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                    {product.available ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => startEdit(product)}
+                    className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
+                    title="Editar produto"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => deleteProduct(product.id)}
+                    className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
+                    title="Excluir produto"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             </div>
