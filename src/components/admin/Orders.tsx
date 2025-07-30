@@ -233,10 +233,10 @@ const Orders: React.FC = () => {
 
       {/* Filtros de Status */}
       <div className="flex justify-center mb-6">
-        <div className="relative filter-dropdown">
+        <div className="relative filter-dropdown w-80">
           <button
             onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            className="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 bg-white shadow-lg border border-gray-200 hover:bg-gray-50"
+            className="w-full px-8 py-4 rounded-lg text-base font-semibold transition-all duration-200 flex items-center justify-center gap-3 bg-white shadow-lg border border-gray-200 hover:bg-gray-50"
           >
             <span className="text-lg">
               {statusFilter === "todos" && "📋"}
@@ -274,15 +274,15 @@ const Orders: React.FC = () => {
 
           {showFilterDropdown && (
             <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-              <div className="py-2">
+              <div className="py-3">
                 <button
                   onClick={() => {
                     setStatusFilter("todos");
                     setShowFilterDropdown(false);
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                  className="w-full px-6 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-base"
                 >
-                  <span className="text-lg">📋</span>
+                  <span className="text-xl">📋</span>
                   Todos ({orders.length})
                 </button>
                 <button
@@ -290,9 +290,9 @@ const Orders: React.FC = () => {
                     setStatusFilter("pendente");
                     setShowFilterDropdown(false);
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                  className="w-full px-6 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-base"
                 >
-                  <span className="text-lg">⏳</span>
+                  <span className="text-xl">⏳</span>
                   Pendentes (
                   {orders.filter((o) => o.status === "pendente").length})
                 </button>
@@ -301,9 +301,9 @@ const Orders: React.FC = () => {
                     setStatusFilter("confirmado");
                     setShowFilterDropdown(false);
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                  className="w-full px-6 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-base"
                 >
-                  <span className="text-lg">✅</span>
+                  <span className="text-xl">✅</span>
                   Confirmados (
                   {orders.filter((o) => o.status === "confirmado").length})
                 </button>
@@ -312,9 +312,9 @@ const Orders: React.FC = () => {
                     setStatusFilter("entregue");
                     setShowFilterDropdown(false);
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                  className="w-full px-6 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-base"
                 >
-                  <span className="text-lg">🚚</span>
+                  <span className="text-xl">🚚</span>
                   Entregues (
                   {orders.filter((o) => o.status === "entregue").length})
                 </button>
