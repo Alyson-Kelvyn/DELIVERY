@@ -61,18 +61,6 @@ export const sendOrderToWhatsApp = (order: Order) => {
   }
   message += `\n`;
 
-  // Informações de entrega
-  message += `🚚 *TIPO DE ENTREGA*\n`;
-  if (order.customer.deliveryType === "entrega") {
-    message += `🏠 *Entrega em Domicílio*\n`;
-    message += `💰 *Taxa de entrega:* R$ ${
-      order.deliveryFee?.toFixed(2) || "2.00"
-    }\n`;
-    message += `⏰ *Prazo:* Até 30 minutos\n`;
-  } else {
-    message += `🏪 *Retirada no Local*\n`;
-  }
-  message += `\n`;
 
   // Itens do pedido
   message += `🍽️ *ITENS DO PEDIDO*\n`;
