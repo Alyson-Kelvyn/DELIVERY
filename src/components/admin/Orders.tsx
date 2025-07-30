@@ -9,9 +9,25 @@ const Orders: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<
     "todos" | "pendente" | "confirmado" | "entregue"
   >("todos");
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
   useEffect(() => {
     fetchTodayOrders();
+  }, []);
+
+  // Fechar dropdown quando clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest(".filter-dropdown")) {
+        setShowFilterDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   // Filtrar pedidos baseado no status selecionado
@@ -217,52 +233,94 @@ const Orders: React.FC = () => {
 
       {/* Filtros de Status */}
       <div className="flex justify-center mb-6">
-        <div className="grid grid-cols-2 md:flex gap-3 bg-white p-2 rounded-xl shadow-lg border border-gray-200">
+        <div className="relative filter-dropdown">
           <button
-            onClick={() => setStatusFilter("todos")}
-            className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
-              statusFilter === "todos"
-                ? "bg-gray-900 text-white shadow-md transform scale-105"
-                : "bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-800"
-            }`}
+            onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+            className="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 bg-white shadow-lg border border-gray-200 hover:bg-gray-50"
           >
-            <span className="text-lg">📋</span>
-            Todos ({orders.length})
+            <span className="text-lg">
+              {statusFilter === "todos" && "📋"}
+              {statusFilter === "pendente" && "⏳"}
+              {statusFilter === "confirmado" && "✅"}
+              {statusFilter === "entregue" && "🚚"}
+            </span>
+            {statusFilter === "todos" && `Todos (${orders.length})`}
+            {statusFilter === "pendente" &&
+              `Pendentes (${
+                orders.filter((o) => o.status === "pendente").length
+              })`}
+            {statusFilter === "confirmado" &&
+              `Confirmados (${
+                orders.filter((o) => o.status === "confirmado").length
+              })`}
+            {statusFilter === "entregue" &&
+              `Entregues (${
+                orders.filter((o) => o.status === "entregue").length
+              })`}
+            <svg
+              className="w-4 h-4 ml-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </button>
-          <button
-            onClick={() => setStatusFilter("pendente")}
-            className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
-              statusFilter === "pendente"
-                ? "bg-red-500 text-white shadow-md transform scale-105"
-                : "bg-red-50 text-red-700 hover:bg-red-100"
-            }`}
-          >
-            <span className="text-lg">⏳</span>
-            Pendentes ({orders.filter((o) => o.status === "pendente").length})
-          </button>
-          <button
-            onClick={() => setStatusFilter("confirmado")}
-            className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
-              statusFilter === "confirmado"
-                ? "bg-yellow-500 text-white shadow-md transform scale-105"
-                : "bg-yellow-50 text-yellow-700 hover:bg-yellow-100"
-            }`}
-          >
-            <span className="text-lg">✅</span>
-            Confirmados (
-            {orders.filter((o) => o.status === "confirmado").length})
-          </button>
-          <button
-            onClick={() => setStatusFilter("entregue")}
-            className={`px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
-              statusFilter === "entregue"
-                ? "bg-green-500 text-white shadow-md transform scale-105"
-                : "bg-green-50 text-green-700 hover:bg-green-100"
-            }`}
-          >
-            <span className="text-lg">🚚</span>
-            Entregues ({orders.filter((o) => o.status === "entregue").length})
-          </button>
+
+          {showFilterDropdown && (
+            <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+              <div className="py-2">
+                <button
+                  onClick={() => {
+                    setStatusFilter("todos");
+                    setShowFilterDropdown(false);
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <span className="text-lg">📋</span>
+                  Todos ({orders.length})
+                </button>
+                <button
+                  onClick={() => {
+                    setStatusFilter("pendente");
+                    setShowFilterDropdown(false);
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <span className="text-lg">⏳</span>
+                  Pendentes (
+                  {orders.filter((o) => o.status === "pendente").length})
+                </button>
+                <button
+                  onClick={() => {
+                    setStatusFilter("confirmado");
+                    setShowFilterDropdown(false);
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <span className="text-lg">✅</span>
+                  Confirmados (
+                  {orders.filter((o) => o.status === "confirmado").length})
+                </button>
+                <button
+                  onClick={() => {
+                    setStatusFilter("entregue");
+                    setShowFilterDropdown(false);
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <span className="text-lg">🚚</span>
+                  Entregues (
+                  {orders.filter((o) => o.status === "entregue").length})
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
