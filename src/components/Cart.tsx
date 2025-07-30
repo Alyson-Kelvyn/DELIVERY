@@ -61,7 +61,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                     <img
                       src={item.product.image_url}
                       alt={item.product.name}
-                      className="w-24 h-24 object-contain rounded-lg p-3 bg-gray-50"
+                      className="w-24 h-24 object-contain rounded-lg"
                     />
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-800">

@@ -88,11 +88,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="relative h-64 bg-gray-50">
+      <div className="relative h-64">
         <img
           src={product.image_url}
           alt={product.name}
-          className="w-full h-full object-contain p-6"
+          className="w-full h-full object-contain"
         />
         <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
           <span className="mr-1">{getCategoryIcon(product.category)}</span>

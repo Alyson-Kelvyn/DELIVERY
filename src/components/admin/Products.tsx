@@ -576,7 +576,7 @@ const Products: React.FC = () => {
                     <img
                       src={formData.image_url}
                       alt="Preview"
-                      className="w-24 h-24 object-contain rounded-lg border p-3 bg-gray-50"
+                      className="w-24 h-24 object-contain rounded-lg border"
                     />
                   </div>
                 )}
@@ -675,11 +675,11 @@ const Products: React.FC = () => {
             className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group"
           >
             {/* Imagem do produto */}
-            <div className="relative h-64 bg-gray-50">
+            <div className="relative h-64">
               <img
                 src={product.image_url}
                 alt={product.name}
-                className="w-full h-full object-contain p-6"
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   e.currentTarget.src =
                     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d1d5db'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E";
