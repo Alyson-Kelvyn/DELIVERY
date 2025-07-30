@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
-import { useCart } from '../context/CartContext';
-import OrderForm from './OrderForm';
+import React, { useState } from "react";
+import { X, Minus, Plus, ShoppingBag } from "lucide-react";
+import { useCart } from "../context/CartContext";
+import OrderForm from "./OrderForm";
 
 interface CartProps {
   isOpen: boolean;
@@ -14,9 +14,9 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
 
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity === 0) {
-      dispatch({ type: 'REMOVE_ITEM', payload: id });
+      dispatch({ type: "REMOVE_ITEM", payload: id });
     } else {
-      dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
+      dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity } });
     }
   };
 
@@ -24,10 +24,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
 
   if (showOrderForm) {
     return (
-      <OrderForm
-        onBack={() => setShowOrderForm(false)}
-        onClose={onClose}
-      />
+      <OrderForm onBack={() => setShowOrderForm(false)} onClose={onClose} />
     );
   }
 
@@ -55,31 +52,42 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
         ) : (
           <>
             <div className="p-4 space-y-4">
-              {state.items.map(item => (
-                <div key={item.product.id} className="bg-gray-50 rounded-lg p-4">
+              {state.items.map((item) => (
+                <div
+                  key={item.product.id}
+                  className="bg-gray-50 rounded-lg p-4"
+                >
                   <div className="flex items-start space-x-3">
                     <img
                       src={item.product.image_url}
                       alt={item.product.name}
-                      className="w-16 h-16 object-cover rounded-lg"
+                      className="w-24 h-24 object-contain rounded-lg p-3 bg-gray-50"
                     />
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800">{item.product.name}</h3>
-                      <p className="text-red-600 font-bold">R$ {item.product.price.toFixed(2)}</p>
+                      <h3 className="font-semibold text-gray-800">
+                        {item.product.name}
+                      </h3>
+                      <p className="text-red-600 font-bold">
+                        R$ {item.product.price.toFixed(2)}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center space-x-3">
                       <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        onClick={() =>
+                          updateQuantity(item.product.id, item.quantity - 1)
+                        }
                         className="bg-gray-200 hover:bg-gray-300 p-1 rounded-full transition-colors"
                       >
                         <Minus className="h-4 w-4" />
                       </button>
                       <span className="font-semibold">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(item.product.id, item.quantity + 1)
+                        }
                         className="bg-red-600 hover:bg-red-700 text-white p-1 rounded-full transition-colors"
                       >
                         <Plus className="h-4 w-4" />
