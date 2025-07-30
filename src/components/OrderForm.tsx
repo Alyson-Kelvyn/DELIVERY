@@ -29,6 +29,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
     number: "",
     neighborhood: "",
     paymentMethod: "cartao",
+    deliveryFee: 2, // Taxa fixa de R$ 2,00
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -108,6 +109,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
       // Construir endereço completo para compatibilidade
       const fullAddress = `${customer.street}, ${customer.number} - ${customer.neighborhood}`;
 
+      const totalWithDelivery = state.total + (customer.deliveryFee || 0);
+
       const order: Order = {
         id: crypto.randomUUID(),
         customer: {
@@ -115,7 +118,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
           address: fullAddress, // Manter compatibilidade com o tipo Order
         },
         items: state.items,
-        total: state.total,
+        total: totalWithDelivery,
+        deliveryFee: customer.deliveryFee || 0,
         status: "pendente",
         created_at: new Date().toISOString(),
       };
@@ -450,6 +454,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                 />
               </div>
             )}
+
+            {/* Informação de Entrega Fixa */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                  <span className="text-red-600 text-sm">🚚</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-800">Entrega em Domicílio</span>
+                  <p className="text-sm text-gray-600">
+                    Taxa de entrega: R$ 2,00 - Entrega em até 30 minutos
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <button
@@ -561,7 +580,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                               <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                                 <span className="text-red-600 text-lg">🍖</span>
                               </div>
-                              <div>
+                              <div className="flex-1">
                                 <div className="font-medium text-gray-800">
                                   {item.product.name}
                                 </div>
@@ -569,6 +588,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                                   {item.quantity}x R${" "}
                                   {item.product.price.toFixed(2)}
                                 </div>
+                                {item.observation && (
+                                  <div className="text-sm text-gray-500 mt-1 bg-white p-2 rounded border">
+                                    <span className="font-medium">
+                                      Observação:
+                                    </span>{" "}
+                                    {item.observation}
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <div className="text-right">
@@ -586,13 +613,32 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
 
                     {/* Total */}
                     <div className="border-t pt-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold text-gray-800">
-                          Total do Pedido:
-                        </span>
-                        <span className="text-2xl font-bold text-red-600">
-                          R$ {state.total.toFixed(2)}
-                        </span>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Subtotal:</span>
+                          <span className="font-semibold">
+                            R$ {state.total.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">
+                            Taxa de Entrega:
+                          </span>
+                          <span className="font-semibold text-red-600">
+                            R$ {customer.deliveryFee.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center border-t pt-2">
+                          <span className="text-lg font-semibold text-gray-800">
+                            Total do Pedido:
+                          </span>
+                          <span className="text-2xl font-bold text-red-600">
+                            R${" "}
+                            {(
+                              state.total + (customer.deliveryFee || 0)
+                            ).toFixed(2)}
+                          </span>
+                        </div>
                       </div>
                       <p className="text-sm text-gray-500 mt-2 text-center">
                         Pedido será enviado para o WhatsApp da churrascaria

@@ -33,7 +33,7 @@ export const sendOrderToWhatsApp = (order: Order) => {
     numberAndNeighborhood.split(" - ")[1] || numberAndNeighborhood
   }\n\n`;
 
-  // Informações de pagamento
+  // Informações de pagamento e entrega
   message += `💳 *FORMA DE PAGAMENTO*\n`;
   const paymentMethod = order.customer.paymentMethod;
   const paymentEmoji =
@@ -52,17 +52,29 @@ export const sendOrderToWhatsApp = (order: Order) => {
   }
   message += `\n`;
 
+  // Informações de entrega
+  message += `🚚 *TIPO DE ENTREGA*\n`;
+  message += `🏠 *Entrega em Domicílio*\n`;
+  message += `💰 *Taxa de entrega:* R$ ${order.deliveryFee?.toFixed(2) || "2.00"}\n`;
+  message += `⏰ *Prazo:* Até 30 minutos\n`;
+  message += `\n`;
+
   // Itens do pedido
   message += `🍽️ *ITENS DO PEDIDO*\n`;
   order.items.forEach((item, index) => {
     const itemTotal = (item.product.price * item.quantity).toFixed(2);
     message += `${index + 1}. ${item.quantity}x ${item.product.name}\n`;
-    message += `   💰 R$ ${itemTotal}\n\n`;
+    message += `   💰 R$ ${itemTotal}\n`;
+    if (item.observation) {
+      message += `   📝 *Observação:* ${item.observation}\n`;
+    }
+    message += `\n`;
   });
 
   // Total e informações do pedido
   message += `💰 *RESUMO DO PEDIDO*\n`;
   message += `📦 *Quantidade de itens:* ${order.items.length}\n`;
+  message += `🚚 *Taxa de entrega:* R$ ${order.deliveryFee?.toFixed(2) || "2.00"}\n`;
   message += `💵 *Total:* R$ ${order.total.toFixed(2)}\n`;
   message += `📅 *Data:* ${formattedDate}\n`;
   message += `⏰ *Hora:* ${formattedTime}\n\n`;

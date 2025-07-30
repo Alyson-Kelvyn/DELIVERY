@@ -13,6 +13,7 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  observation?: string; // Observação opcional para o produto
 }
 
 export interface Customer {
@@ -23,6 +24,7 @@ export interface Customer {
   neighborhood: string;
   paymentMethod: "cartao" | "pix" | "dinheiro";
   changeFor?: number;
+  deliveryFee?: number; // Taxa de entrega (frete)
 }
 
 export interface Order {
@@ -30,6 +32,7 @@ export interface Order {
   customer: Customer & { address: string };
   items: CartItem[];
   total: number;
+  deliveryFee?: number; // Taxa de entrega
   status: "pendente" | "confirmado" | "entregue";
   created_at: string;
 }
