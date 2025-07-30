@@ -8,6 +8,7 @@ import {
   Banknote,
   DollarSign,
   CheckCircle,
+  Truck,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { Customer, Order } from "../types";
@@ -316,44 +317,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                 placeholder="(85) 99999-9999"
                 maxLength={15}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Digite apenas números (DDD + 9 dígitos)
-              </p>
-            </div>
-
-            {/* Informação do Tipo de Entrega Selecionado */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center space-x-3">
-                {customer.deliveryType === "entrega" ? (
-                  <>
-                    <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                      <Truck className="h-5 w-5 text-red-600" />
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-800">
-                        Entrega em Domicílio
-                      </span>
-                      <p className="text-sm text-gray-600">
-                        Taxa de entrega: R$ 2,00 - Entrega em até 30 minutos
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                      <span className="text-green-600 text-lg">🏪</span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-800">
-                        Retirada no Local
-                      </span>
-                      <p className="text-sm text-gray-600">
-                        Sem taxa de entrega - Retire em 15 minutos
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
             </div>
 
             {customer.deliveryType === "entrega" && (
@@ -364,6 +327,25 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                 </label>
 
                 <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Bairro *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={customer.neighborhood}
+                      onChange={(e) =>
+                        setCustomer({
+                          ...customer,
+                          neighborhood: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      placeholder="Centro"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Rua *
@@ -380,41 +362,20 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Número *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={customer.number}
-                        onChange={(e) =>
-                          setCustomer({ ...customer, number: e.target.value })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="123"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Bairro *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={customer.neighborhood}
-                        onChange={(e) =>
-                          setCustomer({
-                            ...customer,
-                            neighborhood: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        placeholder="Centro"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Número *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={customer.number}
+                      onChange={(e) =>
+                        setCustomer({ ...customer, number: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      placeholder="123"
+                    />
                   </div>
                 </div>
               </div>
@@ -503,6 +464,37 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                 />
               </div>
             )}
+          </div>
+
+          {/* Total do Pedido */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-3">
+              Resumo do Pedido
+            </h3>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Subtotal:</span>
+                <span className="font-semibold">
+                  R$ {state.total.toFixed(2)}
+                </span>
+              </div>
+              {customer.deliveryType === "entrega" && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Taxa de Entrega:</span>
+                  <span className="font-semibold text-red-600">
+                    R$ {customer.deliveryFee?.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between items-center border-t pt-2">
+                <span className="text-lg font-semibold text-gray-800">
+                  Total:
+                </span>
+                <span className="text-2xl font-bold text-red-600">
+                  R$ {(state.total + (customer.deliveryFee || 0)).toFixed(2)}
+                </span>
+              </div>
+            </div>
           </div>
 
           <button
