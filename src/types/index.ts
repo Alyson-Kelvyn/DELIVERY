@@ -19,17 +19,18 @@ export interface CartItem {
 export interface Customer {
   name: string;
   phone: string;
-  street: string;
-  number: string;
-  neighborhood: string;
+  deliveryType: "entrega" | "retirada"; // Tipo de entrega
+  street?: string; // Opcional para retirada
+  number?: string; // Opcional para retirada
+  neighborhood?: string; // Opcional para retirada
   paymentMethod: "cartao" | "pix" | "dinheiro";
   changeFor?: number;
-  deliveryFee?: number; // Taxa de entrega (frete)
+  deliveryFee?: number; // Taxa de entrega (frete) - 0 para retirada
 }
 
 export interface Order {
   id: string;
-  customer: Customer & { address: string };
+  customer: Customer & { address?: string }; // Endereço opcional para retirada
   items: CartItem[];
   total: number;
   deliveryFee?: number; // Taxa de entrega

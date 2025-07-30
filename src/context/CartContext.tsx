@@ -4,6 +4,7 @@ import { CartItem, Product } from "../types";
 interface CartState {
   items: CartItem[];
   total: number;
+  deliveryType: "entrega" | "retirada";
 }
 
 type CartAction =
@@ -11,6 +12,7 @@ type CartAction =
   | { type: "REMOVE_ITEM"; payload: string }
   | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
   | { type: "UPDATE_OBSERVATION"; payload: { id: string; observation: string } }
+  | { type: "SET_DELIVERY_TYPE"; payload: "entrega" | "retirada" }
   | { type: "CLEAR_CART" };
 
 const CartContext = createContext<{
@@ -32,6 +34,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
             : item
         );
         return {
+          ...state,
           items: updatedItems,
           total: updatedItems.reduce(
             (sum, item) => sum + item.product.price * item.quantity,
@@ -45,6 +48,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         { product: action.payload, quantity: 1 },
       ];
       return {
+        ...state,
         items: newItems,
         total: newItems.reduce(
           (sum, item) => sum + item.product.price * item.quantity,
@@ -58,6 +62,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         (item) => item.product.id !== action.payload
       );
       return {
+        ...state,
         items: newItems,
         total: newItems.reduce(
           (sum, item) => sum + item.product.price * item.quantity,
@@ -76,6 +81,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         .filter((item) => item.quantity > 0);
 
       return {
+        ...state,
         items: updatedItems,
         total: updatedItems.reduce(
           (sum, item) => sum + item.product.price * item.quantity,
@@ -91,6 +97,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           : item
       );
       return {
+        ...state,
         items: updatedItems,
         total: updatedItems.reduce(
           (sum, item) => sum + item.product.price * item.quantity,
@@ -99,8 +106,14 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       };
     }
 
+    case "SET_DELIVERY_TYPE":
+      return {
+        ...state,
+        deliveryType: action.payload,
+      };
+
     case "CLEAR_CART":
-      return { items: [], total: 0 };
+      return { items: [], total: 0, deliveryType: "entrega" };
 
     default:
       return state;
@@ -113,6 +126,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     total: 0,
+    deliveryType: "entrega",
   });
 
   return (

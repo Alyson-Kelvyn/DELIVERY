@@ -15,8 +15,8 @@ export const sendOrderToWhatsApp = (order: Order) => {
     minute: "2-digit",
   });
 
-  // Construir endereço formatado
-  const addressParts = order.customer.address.split(", ");
+  // Construir endereço formatado (apenas para entrega)
+  const addressParts = order.customer.address?.split(", ") || [];
   const street = addressParts[0] || "";
   const numberAndNeighborhood = addressParts[1] || "";
 
@@ -26,12 +26,21 @@ export const sendOrderToWhatsApp = (order: Order) => {
   message += `👤 *INFORMAÇÕES DO CLIENTE*\n`;
   message += `📋 *Nome:* ${order.customer.name}\n`;
   message += `📱 *Telefone:* ${order.customer.phone}\n`;
-  message += `📍 *Endereço:*\n`;
-  message += `   🏠 *Rua:* ${street}\n`;
-  message += `   🏢 *Número:* ${numberAndNeighborhood.split(" - ")[0] || ""}\n`;
-  message += `   🏘️ *Bairro:* ${
-    numberAndNeighborhood.split(" - ")[1] || numberAndNeighborhood
-  }\n\n`;
+
+  // Informações de endereço (apenas para entrega)
+  if (order.customer.deliveryType === "entrega") {
+    message += `📍 *Endereço:*\n`;
+    message += `   🏠 *Rua:* ${street}\n`;
+    message += `   🏢 *Número:* ${
+      numberAndNeighborhood.split(" - ")[0] || ""
+    }\n`;
+    message += `   🏘️ *Bairro:* ${
+      numberAndNeighborhood.split(" - ")[1] || numberAndNeighborhood
+    }\n`;
+  } else {
+    message += `🏪 *Tipo:* Retirada no Local\n`;
+  }
+  message += `\n`;
 
   // Informações de pagamento e entrega
   message += `💳 *FORMA DE PAGAMENTO*\n`;
@@ -54,9 +63,15 @@ export const sendOrderToWhatsApp = (order: Order) => {
 
   // Informações de entrega
   message += `🚚 *TIPO DE ENTREGA*\n`;
-  message += `🏠 *Entrega em Domicílio*\n`;
-  message += `💰 *Taxa de entrega:* R$ ${order.deliveryFee?.toFixed(2) || "2.00"}\n`;
-  message += `⏰ *Prazo:* Até 30 minutos\n`;
+  if (order.customer.deliveryType === "entrega") {
+    message += `🏠 *Entrega em Domicílio*\n`;
+    message += `💰 *Taxa de entrega:* R$ ${
+      order.deliveryFee?.toFixed(2) || "2.00"
+    }\n`;
+    message += `⏰ *Prazo:* Até 30 minutos\n`;
+  } else {
+    message += `🏪 *Retirada no Local*\n`;
+  }
   message += `\n`;
 
   // Itens do pedido
@@ -70,14 +85,6 @@ export const sendOrderToWhatsApp = (order: Order) => {
     }
     message += `\n`;
   });
-
-  // Total e informações do pedido
-  message += `💰 *RESUMO DO PEDIDO*\n`;
-  message += `📦 *Quantidade de itens:* ${order.items.length}\n`;
-  message += `🚚 *Taxa de entrega:* R$ ${order.deliveryFee?.toFixed(2) || "2.00"}\n`;
-  message += `💵 *Total:* R$ ${order.total.toFixed(2)}\n`;
-  message += `📅 *Data:* ${formattedDate}\n`;
-  message += `⏰ *Hora:* ${formattedTime}\n\n`;
 
   message += `✅ *Pedido recebido com sucesso!*`;
 

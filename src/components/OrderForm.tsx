@@ -25,11 +25,12 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
   const [customer, setCustomer] = useState<Customer>({
     name: "",
     phone: "",
+    deliveryType: state.deliveryType,
     street: "",
     number: "",
     neighborhood: "",
     paymentMethod: "cartao",
-    deliveryFee: 2, // Taxa fixa de R$ 2,00
+    deliveryFee: state.deliveryType === "entrega" ? 2 : 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
@@ -37,14 +38,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
 
   // Função para validar se todos os campos obrigatórios estão preenchidos
   const isFormValid = () => {
-    return (
+    const baseValidation =
       customer.name.trim() !== "" &&
       customer.phone.trim() !== "" &&
-      customer.street.trim() !== "" &&
-      customer.number.trim() !== "" &&
-      customer.neighborhood.trim() !== "" &&
-      (customer.paymentMethod !== "dinheiro" || customer.changeFor)
-    );
+      (customer.paymentMethod !== "dinheiro" || customer.changeFor);
+
+    if (customer.deliveryType === "entrega") {
+      return (
+        baseValidation &&
+        customer.street?.trim() !== "" &&
+        customer.number?.trim() !== "" &&
+        customer.neighborhood?.trim() !== ""
+      );
+    }
+
+    return baseValidation;
   };
 
   const handleFinalizeClick = (e: React.FormEvent) => {
@@ -106,8 +114,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
     setIsSubmitting(true);
 
     try {
-      // Construir endereço completo para compatibilidade
-      const fullAddress = `${customer.street}, ${customer.number} - ${customer.neighborhood}`;
+      // Construir endereço completo para compatibilidade (apenas para entrega)
+      const fullAddress =
+        customer.deliveryType === "entrega"
+          ? `${customer.street}, ${customer.number} - ${customer.neighborhood}`
+          : "";
 
       const totalWithDelivery = state.total + (customer.deliveryFee || 0);
 
@@ -245,7 +256,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
           </h2>
           <p className="text-gray-600 mb-6">
             Seu pedido foi enviado para o WhatsApp da churrascaria. Em breve
-            entraremos em contato para confirmar a entrega!
+            entraremos em contato para confirmar a{" "}
+            {customer.deliveryType === "entrega" ? "entrega" : "retirada"}!
           </p>
           <button
             onClick={onClose}
@@ -309,67 +321,104 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
               </p>
             </div>
 
-            <div>
-              <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                <MapPin className="h-4 w-4" />
-                <span>Endereço de Entrega *</span>
-              </label>
+            {/* Informação do Tipo de Entrega Selecionado */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                {customer.deliveryType === "entrega" ? (
+                  <>
+                    <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                      <Truck className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-800">
+                        Entrega em Domicílio
+                      </span>
+                      <p className="text-sm text-gray-600">
+                        Taxa de entrega: R$ 2,00 - Entrega em até 30 minutos
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <span className="text-green-600 text-lg">🏪</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-800">
+                        Retirada no Local
+                      </span>
+                      <p className="text-sm text-gray-600">
+                        Sem taxa de entrega - Retire em 15 minutos
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
 
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Rua *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={customer.street}
-                    onChange={(e) =>
-                      setCustomer({ ...customer, street: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    placeholder="Nome da rua"
-                  />
-                </div>
+            {customer.deliveryType === "entrega" && (
+              <div>
+                <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>Endereço de Entrega *</span>
+                </label>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Número *
+                      Rua *
                     </label>
                     <input
                       type="text"
                       required
-                      value={customer.number}
+                      value={customer.street}
                       onChange={(e) =>
-                        setCustomer({ ...customer, number: e.target.value })
+                        setCustomer({ ...customer, street: e.target.value })
                       }
                       className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="123"
+                      placeholder="Nome da rua"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Bairro *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={customer.neighborhood}
-                      onChange={(e) =>
-                        setCustomer({
-                          ...customer,
-                          neighborhood: e.target.value,
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="Centro"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Número *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={customer.number}
+                        onChange={(e) =>
+                          setCustomer({ ...customer, number: e.target.value })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        placeholder="123"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Bairro *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={customer.neighborhood}
+                        onChange={(e) =>
+                          setCustomer({
+                            ...customer,
+                            neighborhood: e.target.value,
+                          })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        placeholder="Centro"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div>
               <label className="text-sm font-medium text-gray-700 mb-3 block">
@@ -454,21 +503,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                 />
               </div>
             )}
-
-            {/* Informação de Entrega Fixa */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                  <span className="text-red-600 text-sm">🚚</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-800">Entrega em Domicílio</span>
-                  <p className="text-sm text-gray-600">
-                    Taxa de entrega: R$ 2,00 - Entrega em até 30 minutos
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           <button
@@ -520,15 +554,27 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-600">Endereço:</span>
-                          <span className="font-medium text-right">
-                            {customer.street &&
-                            customer.number &&
-                            customer.neighborhood
-                              ? `${customer.street}, ${customer.number} - ${customer.neighborhood}`
-                              : "—"}
+                          <span className="text-gray-600">
+                            Tipo de Entrega:
+                          </span>
+                          <span className="font-medium">
+                            {customer.deliveryType === "entrega"
+                              ? "🚚 Entrega"
+                              : "🏪 Retirada"}
                           </span>
                         </div>
+                        {customer.deliveryType === "entrega" && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Endereço:</span>
+                            <span className="font-medium text-right">
+                              {customer.street &&
+                              customer.number &&
+                              customer.neighborhood
+                                ? `${customer.street}, ${customer.number} - ${customer.neighborhood}`
+                                : "—"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -620,14 +666,16 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                             R$ {state.total.toFixed(2)}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">
-                            Taxa de Entrega:
-                          </span>
-                          <span className="font-semibold text-red-600">
-                            R$ {customer.deliveryFee.toFixed(2)}
-                          </span>
-                        </div>
+                        {customer.deliveryType === "entrega" && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              Taxa de Entrega:
+                            </span>
+                            <span className="font-semibold text-red-600">
+                              R$ {customer.deliveryFee.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex justify-between items-center border-t pt-2">
                           <span className="text-lg font-semibold text-gray-800">
                             Total do Pedido:

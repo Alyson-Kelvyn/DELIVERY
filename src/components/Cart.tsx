@@ -43,8 +43,8 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
     setObservationText("");
   };
 
-  // Taxa de entrega fixa de R$ 2,00
-  const deliveryFee = 2;
+  // Taxa de entrega baseada no tipo de entrega
+  const deliveryFee = state.deliveryType === "entrega" ? 2 : 0;
   const totalWithDelivery = state.total + deliveryFee;
 
   if (!isOpen) return null;
@@ -188,18 +188,63 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                 </div>
               ))}
 
-              {/* Taxa de Entrega Fixa */}
+              {/* Seleção de Tipo de Entrega */}
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                <h3 className="font-semibold text-gray-800 mb-3">
+                  Tipo de Entrega
+                </h3>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                    <input
+                      type="radio"
+                      name="deliveryType"
+                      value="entrega"
+                      checked={state.deliveryType === "entrega"}
+                      onChange={() =>
+                        dispatch({
+                          type: "SET_DELIVERY_TYPE",
+                          payload: "entrega",
+                        })
+                      }
+                      className="text-red-600"
+                    />
                     <Truck className="h-5 w-5 text-gray-600" />
-                    <div>
-                      <h3 className="font-semibold text-gray-800">
-                        Taxa de Entrega
-                      </h3>
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-800">
+                        Entrega em Domicílio
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Taxa de R$ 2,00 - Entrega em até 30 minutos
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-red-600 font-bold">R$ 2,00</span>
+                  </label>
+
+                  <label className="flex items-center space-x-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                    <input
+                      type="radio"
+                      name="deliveryType"
+                      value="retirada"
+                      checked={state.deliveryType === "retirada"}
+                      onChange={() =>
+                        dispatch({
+                          type: "SET_DELIVERY_TYPE",
+                          payload: "retirada",
+                        })
+                      }
+                      className="text-red-600"
+                    />
+                    <div className="w-5 h-5 text-gray-600 flex items-center justify-center">
+                      <span className="text-lg">🏪</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-800">
+                        Retirada no Local
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Sem taxa de entrega - Retire em 15 minutos
+                      </div>
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>
@@ -212,12 +257,14 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                     R$ {state.total.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Taxa de Entrega:</span>
-                  <span className="font-semibold text-red-600">
-                    R$ {deliveryFee.toFixed(2)}
-                  </span>
-                </div>
+                {state.deliveryType === "entrega" && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Taxa de Entrega:</span>
+                    <span className="font-semibold text-red-600">
+                      R$ {deliveryFee.toFixed(2)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between border-t pt-2">
                   <span className="text-lg font-semibold">Total:</span>
                   <span className="text-2xl font-bold text-red-600">
