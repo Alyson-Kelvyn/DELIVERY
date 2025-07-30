@@ -9,6 +9,7 @@ const Products: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -57,57 +58,58 @@ const Products: React.FC = () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .order("name");
+        .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching products:", error);
-        alert("Erro ao buscar produtos: " + error.message);
-      } else {
-        // Verificar produtos com estoque zero e torná-los indisponíveis
-        const productsWithStockCheck = data || [];
-        const productsToUpdate = productsWithStockCheck.filter(
-          (product) =>
-            product.stock !== null && product.stock <= 0 && product.available
+        showNotification(
+          "Erro ao carregar produtos: " + error.message,
+          "error"
         );
-
-        if (productsToUpdate.length > 0) {
-          // Atualizar produtos com estoque zero para indisponível
-          const { error: updateError } = await supabase
-            .from("products")
-            .update({ available: false })
-            .in(
-              "id",
-              productsToUpdate.map((p) => p.id)
-            );
-
-          if (updateError) {
-            console.error("Error updating products availability:", updateError);
-          } else {
-            console.log(
-              `${productsToUpdate.length} produtos com estoque zero foram marcados como indisponíveis`
-            );
-          }
-
-          // Buscar produtos novamente para ter os dados atualizados
-          const { data: updatedData, error: refetchError } = await supabase
-            .from("products")
-            .select("*")
-            .order("name");
-
-          if (refetchError) {
-            console.error("Error refetching products:", refetchError);
-          } else {
-            setProducts(updatedData || []);
-          }
-        } else {
-          setProducts(productsWithStockCheck);
-        }
+      } else {
+        setProducts(data || []);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Erro inesperado ao buscar produtos: " + (error as Error).message);
+      showNotification("Erro inesperado ao carregar produtos", "error");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função para fazer upload da imagem para o Supabase Storage
+  const uploadImage = async (file: File): Promise<string> => {
+    try {
+      setUploadingImage(true);
+
+      // Gerar nome único para o arquivo
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `product-images/${fileName}`;
+
+      // Upload para o Supabase Storage
+      const { data, error } = await supabase.storage
+        .from("products")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      // Obter URL pública da imagem
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("products").getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Erro no upload da imagem:", error);
+      throw error;
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -120,7 +122,10 @@ const Products: React.FC = () => {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        alert("Você precisa estar logado para criar produtos.");
+        showNotification(
+          "Você precisa estar logado para criar produtos.",
+          "error"
+        );
         return;
       }
 
@@ -144,13 +149,17 @@ const Products: React.FC = () => {
 
         if (error) {
           console.error("Error updating product:", error);
-          alert("Erro ao atualizar produto: " + error.message);
+          showNotification(
+            "Erro ao atualizar produto: " + error.message,
+            "error"
+          );
         } else {
           setProducts(
             products.map((p) =>
               p.id === editingProduct.id ? { ...p, ...productData } : p
             )
           );
+          showNotification("Produto atualizado com sucesso!", "success");
         }
       } else {
         // Create new product
@@ -164,16 +173,17 @@ const Products: React.FC = () => {
 
         if (error) {
           console.error("Error creating product:", error);
-          alert("Erro ao criar produto: " + error.message);
+          showNotification("Erro ao criar produto: " + error.message, "error");
         } else {
           setProducts([...products, newProduct]);
+          showNotification("Produto criado com sucesso!", "success");
         }
       }
 
       resetForm();
     } catch (error) {
       console.error("Error:", error);
-      alert("Erro inesperado: " + (error as Error).message);
+      showNotification("Erro inesperado: " + (error as Error).message, "error");
     }
   };
 
@@ -533,20 +543,43 @@ const Products: React.FC = () => {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      // Para demo, vamos usar uma URL temporária
-                      // Em produção, você faria upload para um serviço como Supabase Storage
-                      const imageUrl = URL.createObjectURL(file);
-                      setFormData({ ...formData, image_url: imageUrl });
+                      try {
+                        showNotification("Fazendo upload da imagem...", "info");
+                        const imageUrl = await uploadImage(file);
+                        setFormData({ ...formData, image_url: imageUrl });
+                        showNotification(
+                          "Imagem enviada com sucesso!",
+                          "success"
+                        );
+                      } catch (error) {
+                        console.error("Erro no upload:", error);
+                        showNotification(
+                          "Erro ao enviar imagem: " + (error as Error).message,
+                          "error"
+                        );
+                      }
                     }
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
+                  disabled={uploadingImage}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Selecione uma imagem do seu computador
+                  {uploadingImage
+                    ? "Enviando imagem..."
+                    : "Selecione uma imagem do seu computador"}
                 </p>
+                {formData.image_url && (
+                  <div className="mt-2">
+                    <img
+                      src={formData.image_url}
+                      alt="Preview"
+                      className="w-20 h-20 object-cover rounded-lg border"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center">
