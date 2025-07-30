@@ -214,7 +214,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                         Entrega em Domicílio
                       </div>
                       <div className="text-sm text-gray-600">
-                        Taxa de R$ 2,00 - Entrega em até 30 minutos
+                        Taxa de R$ 2,00
                       </div>
                     </div>
                   </label>
@@ -241,7 +241,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                         Retirada no Local
                       </div>
                       <div className="text-sm text-gray-600">
-                        Sem taxa de entrega - Retire em 15 minutos
+                        Sem taxa de entrega
                       </div>
                     </div>
                   </label>
