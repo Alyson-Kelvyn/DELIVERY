@@ -108,6 +108,75 @@ const Orders: React.FC = () => {
             status: "confirmado",
             created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
           },
+          {
+            id: "3",
+            customer: {
+              name: "Pedro Oliveira",
+              phone: "(85) 77777-7777",
+              paymentMethod: "pix",
+              deliveryType: "retirada",
+            },
+            items: [
+              {
+                product: {
+                  id: "3",
+                  name: "Marmita de Frango",
+                  description: "",
+                  price: 16.9,
+                  image_url: "",
+                  available: true,
+                  created_at: "",
+                  category: "marmitas",
+                },
+                quantity: 1,
+              },
+              {
+                product: {
+                  id: "4",
+                  name: "Refrigerante",
+                  description: "",
+                  price: 5.0,
+                  image_url: "",
+                  available: true,
+                  created_at: "",
+                  category: "bebidas",
+                },
+                quantity: 2,
+              },
+            ],
+            total: 26.9,
+            status: "pendente",
+            created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+          },
+          {
+            id: "4",
+            customer: {
+              name: "Ana Costa",
+              phone: "(85) 66666-6666",
+              address: "Rua do Comércio, 789 - Centro",
+              paymentMethod: "dinheiro",
+              changeFor: 20,
+              deliveryType: "entrega",
+            },
+            items: [
+              {
+                product: {
+                  id: "5",
+                  name: "Marmita de Carne de Sol",
+                  description: "",
+                  price: 22.9,
+                  image_url: "",
+                  available: true,
+                  created_at: "",
+                  category: "marmitas",
+                },
+                quantity: 1,
+              },
+            ],
+            total: 22.9,
+            status: "confirmado",
+            created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+          },
         ]);
       } else {
         setOrders(
@@ -161,6 +230,10 @@ const Orders: React.FC = () => {
     newStatus: Order["status"]
   ) => {
     try {
+      console.log(
+        `Tentando atualizar pedido ${orderId} para status: ${newStatus}`
+      );
+
       const { error } = await supabase
         .from("orders")
         .update({ status: newStatus })
@@ -168,7 +241,13 @@ const Orders: React.FC = () => {
 
       if (error) {
         console.error("Error updating order:", error);
+        alert(`Erro ao atualizar pedido: ${error.message}`);
+        return;
       }
+
+      console.log(
+        `Pedido ${orderId} atualizado com sucesso para: ${newStatus}`
+      );
 
       // Update local state
       setOrders(
@@ -178,6 +257,7 @@ const Orders: React.FC = () => {
       );
     } catch (error) {
       console.error("Error:", error);
+      alert(`Erro inesperado: ${error}`);
     }
   };
 
@@ -412,36 +492,47 @@ const Orders: React.FC = () => {
                         {order.customer.phone}
                       </div>
                       <div className="text-gray-500 text-sm space-y-1">
-                        {(() => {
-                          const address = formatAddress(order.customer.address);
-                          return (
-                            <>
-                              <div className="flex items-center gap-1">
-                                <span>📍</span>{" "}
-                                <span className="font-medium">Rua:</span>{" "}
-                                {address.street}
-                              </div>
-                              {address.number && (
-                                <div className="flex items-center gap-1 ml-4">
-                                  <span className="font-medium">Nº:</span>{" "}
-                                  {address.number}
+                        {order.customer.deliveryType === "retirada" ? (
+                          <div className="flex items-center gap-1">
+                            <span>🏪</span>
+                            <span className="font-medium text-green-600">
+                              Retirada no local
+                            </span>
+                          </div>
+                        ) : (
+                          (() => {
+                            const address = formatAddress(
+                              order.customer.address
+                            );
+                            return (
+                              <>
+                                <div className="flex items-center gap-1">
+                                  <span>📍</span>
+                                  <span className="font-medium">Rua:</span>{" "}
+                                  {address.street}
                                 </div>
-                              )}
-                              {address.neighborhood && (
-                                <div className="flex items-center gap-1 ml-4">
-                                  <span className="font-medium">Bairro:</span>{" "}
-                                  {address.neighborhood}
-                                </div>
-                              )}
-                            </>
-                          );
-                        })()}
+                                {address.number && (
+                                  <div className="flex items-center gap-1 ml-4">
+                                    <span className="font-medium">Nº:</span>{" "}
+                                    {address.number}
+                                  </div>
+                                )}
+                                {address.neighborhood && (
+                                  <div className="flex items-center gap-1 ml-4">
+                                    <span className="font-medium">Bairro:</span>{" "}
+                                    {address.neighborhood}
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()
+                        )}
                       </div>
                     </div>
                     {/* Pagamento */}
                     <div>
                       <h3 className="font-semibold text-gray-800 mb-1 flex items-center gap-1">
-                        <span>💳</span> Pagamento
+                        Pagamento
                       </h3>
                       <div className="text-gray-700 capitalize font-medium">
                         {order.customer.paymentMethod === "pix" && (
