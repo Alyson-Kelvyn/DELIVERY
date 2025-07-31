@@ -198,21 +198,30 @@ const Menu: React.FC = () => {
       </div>
 
       {/* Filtros de Categoria */}
-      <div className="flex flex-wrap justify-center gap-2 mb-8">
-        {categories.map((category) => (
-          <button
-            key={category.value}
-            onClick={() => setSelectedCategory(category.value)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-              selectedCategory === category.value
-                ? "bg-orange-500 text-white shadow-lg"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <span className="mr-2">{category.icon}</span>
-            {category.label}
-          </button>
-        ))}
+      <div className="mb-8">
+        {/* Container com scroll horizontal para mobile */}
+        <div className="relative">
+          <div className="flex overflow-x-auto scrollbar-hide pb-2 md:flex-wrap md:justify-center md:gap-2 gap-3 md:gap-2 px-4 md:px-0">
+            {categories.map((category) => (
+              <button
+                key={category.value}
+                onClick={() => setSelectedCategory(category.value)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  selectedCategory === category.value
+                    ? "bg-orange-500 text-white shadow-lg"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                <span className="mr-2">{category.icon}</span>
+                {category.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Indicadores visuais de scroll no mobile */}
+          <div className="md:hidden absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
+          <div className="md:hidden absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+        </div>
       </div>
 
       {filteredProducts.length === 0 ? (

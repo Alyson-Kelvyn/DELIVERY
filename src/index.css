@@ -32,3 +32,20 @@
 .animate-out {
   animation: slide-out-to-right 0.3s ease-in;
 }
+
+/* Estilos para scroll horizontal sem barra de rolagem */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* Melhorar a experiência de scroll no mobile */
+@media (max-width: 768px) {
+  .scrollbar-hide {
+    scroll-behavior: smooth;
+  }
+}
