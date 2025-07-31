@@ -76,7 +76,9 @@ const AdminApp: React.FC = () => {
     <div className="flex min-h-screen bg-gray-100">
       {/* Botão sanduíche para mobile */}
       <button
-        className="md:hidden fixed top-4 left-4 z-30 bg-white p-2 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-red-500"
+        className={`md:hidden fixed top-4 left-4 z-30 bg-white p-2 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 transition-opacity duration-300 ${
+          showSidebar ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
         onClick={() => setShowSidebar(true)}
         aria-label="Abrir menu"
         tabIndex={0}

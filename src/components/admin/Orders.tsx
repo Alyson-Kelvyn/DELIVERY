@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CheckCircle, Clock, Truck, Calendar } from "lucide-react";
+import { CheckCircle, Clock, Truck, Calendar, X } from "lucide-react";
 import { Order } from "../../types";
 import { supabase } from "../../lib/supabase";
 
@@ -7,7 +7,7 @@ const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<
-    "todos" | "pendente" | "confirmado" | "entregue"
+    "todos" | "pendente" | "confirmado" | "entregue" | "cancelado"
   >("todos");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
@@ -58,6 +58,7 @@ const Orders: React.FC = () => {
               phone: "(85) 99999-9999",
               address: "Rua das Flores, 123 - Centro",
               paymentMethod: "pix",
+              deliveryType: "entrega",
             },
             items: [
               {
@@ -69,6 +70,7 @@ const Orders: React.FC = () => {
                   image_url: "",
                   available: true,
                   created_at: "",
+                  category: "marmitas",
                 },
                 quantity: 2,
               },
@@ -85,6 +87,7 @@ const Orders: React.FC = () => {
               address: "Av. Principal, 456 - Bairro Novo",
               paymentMethod: "dinheiro",
               changeFor: 50,
+              deliveryType: "entrega",
             },
             items: [
               {
@@ -96,6 +99,7 @@ const Orders: React.FC = () => {
                   image_url: "",
                   available: true,
                   created_at: "",
+                  category: "marmitas",
                 },
                 quantity: 1,
               },
@@ -125,7 +129,8 @@ const Orders: React.FC = () => {
   };
 
   // Função para formatar o endereço
-  const formatAddress = (address: string) => {
+  const formatAddress = (address: string | undefined) => {
+    if (!address) return { street: "", number: "", neighborhood: "" };
     const parts = address.split(", ");
     if (parts.length >= 2) {
       const street = parts[0];
@@ -184,6 +189,8 @@ const Orders: React.FC = () => {
         return "bg-blue-100 text-blue-800";
       case "entregue":
         return "bg-green-100 text-green-800";
+      case "cancelado":
+        return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -197,6 +204,8 @@ const Orders: React.FC = () => {
         return <CheckCircle className="h-4 w-4" />;
       case "entregue":
         return <Truck className="h-4 w-4" />;
+      case "cancelado":
+        return <X className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
     }
@@ -243,6 +252,7 @@ const Orders: React.FC = () => {
               {statusFilter === "pendente" && "⏳"}
               {statusFilter === "confirmado" && "✅"}
               {statusFilter === "entregue" && "🚚"}
+              {statusFilter === "cancelado" && "❌"}
             </span>
             {statusFilter === "todos" && `Todos (${orders.length})`}
             {statusFilter === "pendente" &&
@@ -256,6 +266,10 @@ const Orders: React.FC = () => {
             {statusFilter === "entregue" &&
               `Entregues (${
                 orders.filter((o) => o.status === "entregue").length
+              })`}
+            {statusFilter === "cancelado" &&
+              `Cancelados (${
+                orders.filter((o) => o.status === "cancelado").length
               })`}
             <svg
               className="w-4 h-4 ml-2"
@@ -318,6 +332,17 @@ const Orders: React.FC = () => {
                   Entregues (
                   {orders.filter((o) => o.status === "entregue").length})
                 </button>
+                <button
+                  onClick={() => {
+                    setStatusFilter("cancelado");
+                    setShowFilterDropdown(false);
+                  }}
+                  className="w-full px-6 py-3 text-left hover:bg-gray-50 flex items-center gap-3 text-base"
+                >
+                  <span className="text-xl">❌</span>
+                  Cancelados (
+                  {orders.filter((o) => o.status === "cancelado").length})
+                </button>
               </div>
             </div>
           )}
@@ -335,7 +360,9 @@ const Orders: React.FC = () => {
                     ? "pendente"
                     : statusFilter === "confirmado"
                     ? "confirmado"
-                    : "entregue"
+                    : statusFilter === "entregue"
+                    ? "entregue"
+                    : "cancelado"
                 } hoje`}
           </p>
         </div>
@@ -479,24 +506,47 @@ const Orders: React.FC = () => {
                 {/* Coluna de ações/status */}
                 <div className="flex flex-row md:flex-col gap-2 md:items-end md:justify-between min-w-[140px]">
                   {order.status === "pendente" && (
-                    <button
-                      onClick={() => updateOrderStatus(order.id, "confirmado")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
-                    >
-                      Confirmar
-                    </button>
+                    <>
+                      <button
+                        onClick={() =>
+                          updateOrderStatus(order.id, "confirmado")
+                        }
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
+                      >
+                        Confirmar
+                      </button>
+                      <button
+                        onClick={() => updateOrderStatus(order.id, "cancelado")}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                    </>
                   )}
                   {order.status === "confirmado" && (
-                    <button
-                      onClick={() => updateOrderStatus(order.id, "entregue")}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
-                    >
-                      Entregar
-                    </button>
+                    <>
+                      <button
+                        onClick={() => updateOrderStatus(order.id, "entregue")}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
+                      >
+                        Entregar
+                      </button>
+                      <button
+                        onClick={() => updateOrderStatus(order.id, "cancelado")}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                    </>
                   )}
                   {order.status === "entregue" && (
                     <span className="text-green-600 font-semibold text-sm flex items-center gap-1">
                       ✅ Entregue
+                    </span>
+                  )}
+                  {order.status === "cancelado" && (
+                    <span className="text-red-600 font-semibold text-sm flex items-center gap-1">
+                      ❌ Cancelado
                     </span>
                   )}
                 </div>

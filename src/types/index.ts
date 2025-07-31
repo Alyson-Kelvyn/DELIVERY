@@ -34,7 +34,7 @@ export interface Order {
   items: CartItem[];
   total: number;
   deliveryFee?: number; // Taxa de entrega
-  status: "pendente" | "confirmado" | "entregue";
+  status: "pendente" | "confirmado" | "entregue" | "cancelado";
   created_at: string;
 }
 
