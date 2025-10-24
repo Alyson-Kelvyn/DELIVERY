@@ -90,7 +90,7 @@ const Menu: React.FC = () => {
             image_url:
               "https://images.pexels.com/photos/248444/pexels-photo-248444.jpeg?auto=compress&cs=tinysrgb&w=500",
             available: true,
-            stock: null,
+            stock: undefined,
             category: "marmitas",
             created_at: new Date().toISOString(),
           },
@@ -165,79 +165,101 @@ const Menu: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-gray-200 rounded-xl animate-pulse">
-              <div className="h-64 bg-gray-300 rounded-t-xl bg-gray-50"></div>
-              <div className="p-4 space-y-3">
-                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-300 rounded w-full"></div>
-                <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+      <section className="container mx-auto px-4 py-12">
+        {/* Loading header */}
+        <div className="text-center mb-12">
+          <div className="h-10 bg-gray-200 rounded-lg w-80 mx-auto mb-4 shimmer"></div>
+          <div className="h-6 bg-gray-200 rounded-lg w-96 mx-auto shimmer"></div>
+        </div>
+
+        {/* Loading categories */}
+        <div className="mb-12 flex justify-center gap-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-12 w-28 bg-gray-200 rounded-2xl shimmer"></div>
+          ))}
+        </div>
+
+        {/* Loading products */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="card-elegant overflow-hidden">
+              <div className="h-64 bg-gray-200 shimmer"></div>
+              <div className="p-6 space-y-4">
+                <div className="h-6 bg-gray-200 rounded w-3/4 shimmer"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-full shimmer"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3 shimmer"></div>
+                </div>
                 <div className="flex justify-between items-center">
-                  <div className="h-6 bg-gray-300 rounded w-1/3"></div>
-                  <div className="h-10 bg-gray-300 rounded w-1/3"></div>
+                  <div className="h-8 bg-gray-200 rounded w-1/3 shimmer"></div>
+                  <div className="h-10 bg-gray-200 rounded w-1/3 shimmer"></div>
                 </div>
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">
-          Nosso Cardápio
+    <section className="container mx-auto px-4 py-12">
+      <div className="text-center mb-12">
+        <h2 className="text-4xl font-display font-bold text-gray-800 mb-4">
+          Nosso Cardápio Especial
         </h2>
-        <p className="text-gray-600">
-          Deliciosas opções preparadas com carinho
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Deliciosas opções preparadas com ingredientes selecionados e todo o carinho da tradição brasileira
         </p>
+        <div className="mt-4 w-24 h-1 bg-gradient-to-r from-primary-500 to-primary-600 mx-auto rounded-full"></div>
       </div>
 
       {/* Filtros de Categoria */}
-      <div className="mb-8">
-        {/* Container com scroll horizontal para mobile */}
+      <div className="mb-12">
         <div className="relative">
-          <div className="flex overflow-x-auto scrollbar-hide pb-2 md:flex-wrap md:justify-center md:gap-2 gap-3 md:gap-2 px-4 md:px-0">
+          <div className="flex overflow-x-auto scrollbar-hide pb-4 md:flex-wrap md:justify-center gap-3 px-4 md:px-0">
             {categories.map((category) => (
               <button
                 key={category.value}
                 onClick={() => setSelectedCategory(category.value)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`flex-shrink-0 px-6 py-3 rounded-2xl text-sm font-medium transition-all duration-300 whitespace-nowrap btn-hover ${
                   selectedCategory === category.value
-                    ? "bg-orange-500 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-elegant"
+                    : "glass-effect text-gray-700 hover:bg-white hover:shadow-card"
                 }`}
               >
-                <span className="mr-2">{category.icon}</span>
+                <span className="mr-2 text-lg">{category.icon}</span>
                 {category.label}
               </button>
             ))}
           </div>
 
           {/* Indicadores visuais de scroll no mobile */}
-          <div className="md:hidden absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
-          <div className="md:hidden absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+          <div className="md:hidden absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white via-white to-transparent pointer-events-none"></div>
+          <div className="md:hidden absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white via-white to-transparent pointer-events-none"></div>
         </div>
       </div>
 
       {filteredProducts.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-500 text-lg">
-            Nenhum produto disponível nesta categoria
-          </p>
+        <div className="text-center py-20">
+          <div className="glass-effect max-w-md mx-auto p-8 rounded-3xl">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-display font-semibold text-gray-800 mb-2">
+              Nenhum produto encontrado
+            </h3>
+            <p className="text-gray-600">
+              Não há produtos disponíveis nesta categoria no momento
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 };
 

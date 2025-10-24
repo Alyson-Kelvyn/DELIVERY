@@ -8,7 +8,6 @@ import {
   Banknote,
   DollarSign,
   CheckCircle,
-  Truck,
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { Customer, Order } from "../types";
@@ -249,46 +248,65 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
 
   if (orderSuccess) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center">
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            Pedido Realizado!
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div className="glass-effect max-w-md w-full text-center p-8 animate-slide-up">
+          <div className="bg-gradient-to-br from-green-100 to-green-200 p-6 rounded-3xl mb-6 mx-auto w-fit">
+            <CheckCircle className="h-20 w-20 text-green-600 mx-auto animate-bounce-subtle" />
+          </div>
+          <h2 className="text-3xl font-display font-bold text-gray-800 mb-4">
+            🎉 Pedido Realizado!
           </h2>
-          <p className="text-gray-600 mb-6">
-            Seu pedido foi enviado para o WhatsApp da churrascaria. Em breve
-            entraremos em contato para confirmar a{" "}
-            {customer.deliveryType === "entrega" ? "entrega" : "retirada"}!
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            Seu pedido foi enviado para nosso WhatsApp! Em breve entraremos em contato para confirmar sua{" "}
+            <span className="font-semibold text-primary-600">
+              {customer.deliveryType === "entrega" ? "entrega" : "retirada"}
+            </span>
+            .
           </p>
-          <button
-            onClick={onClose}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition-colors"
-          >
-            Continuar Comprando
-          </button>
+          <div className="space-y-4">
+            <div className="glass-effect p-4 rounded-2xl border border-green-200">
+              <p className="text-sm text-gray-600">
+                📱 Acompanhe seu pedido pelo WhatsApp
+              </p>
+              <p className="text-xs text-green-600 font-medium mt-1">
+                ⏱️ Tempo estimado: 25-35 minutos
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-full btn-primary py-4 text-lg font-semibold"
+            >
+              Continuar Comprando
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
-      <div className="bg-white w-full h-full overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b p-4 flex items-center">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fade-in">
+      <div className="bg-white w-full h-full overflow-y-auto custom-scrollbar animate-in">
+        <div className="sticky top-0 glass-effect border-b border-primary-100 p-6 flex items-center">
           <button
             onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors mr-3"
+            className="p-3 hover:bg-primary-50 hover:text-primary-600 rounded-full transition-all duration-300 mr-4 hover:scale-110"
           >
             <ArrowLeft className="h-6 w-6" />
           </button>
-          <h2 className="text-xl font-bold text-gray-800">Finalizar Pedido</h2>
+          <div>
+            <h2 className="text-2xl font-display font-bold text-gray-800">Finalizar Pedido</h2>
+            <p className="text-sm text-gray-600">Preencha seus dados para completar a compra</p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-6">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          <div className="space-y-6">
             <div>
-              <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                <User className="h-4 w-4" />
+              <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-3">
+                <div className="bg-primary-100 p-1.5 rounded-lg">
+                  <User className="h-4 w-4 text-primary-600" />
+                </div>
                 <span>Nome Completo *</span>
               </label>
               <input
@@ -298,14 +316,16 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                 onChange={(e) =>
                   setCustomer({ ...customer, name: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="Seu nome completo"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300"
+                placeholder="Digite seu nome completo"
               />
             </div>
 
             <div>
-              <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                <Phone className="h-4 w-4" />
+              <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-3">
+                <div className="bg-green-100 p-1.5 rounded-lg">
+                  <Phone className="h-4 w-4 text-green-600" />
+                </div>
                 <span>Telefone *</span>
               </label>
               <input
@@ -313,22 +333,24 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                 required
                 value={customer.phone}
                 onChange={handlePhoneChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300"
                 placeholder="(85) 99999-9999"
                 maxLength={15}
               />
             </div>
 
             {customer.deliveryType === "entrega" && (
-              <div>
-                <label className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>Endereço de Entrega *</span>
+              <div className="card-elegant p-6">
+                <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-4">
+                  <div className="bg-blue-100 p-1.5 rounded-lg">
+                    <MapPin className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span>📍 Endereço de Entrega *</span>
                 </label>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Bairro *
                     </label>
                     <input
@@ -341,52 +363,59 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                           neighborhood: e.target.value,
                         })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="Centro"
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300"
+                      placeholder="Ex: Centro, Vila Nova..."
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Rua *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={customer.street}
-                      onChange={(e) =>
-                        setCustomer({ ...customer, street: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="Nome da rua"
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Rua *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={customer.street}
+                        onChange={(e) =>
+                          setCustomer({ ...customer, street: e.target.value })
+                        }
+                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300"
+                        placeholder="Nome da rua"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Número *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={customer.number}
-                      onChange={(e) =>
-                        setCustomer({ ...customer, number: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      placeholder="123"
-                    />
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Número *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={customer.number}
+                        onChange={(e) =>
+                          setCustomer({ ...customer, number: e.target.value })
+                        }
+                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300"
+                        placeholder="123"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-3 block">
+            <div className="card-elegant p-6">
+              <label className="text-sm font-semibold text-gray-700 mb-4 flex items-center">
+                <span className="mr-2">💳</span>
                 Forma de Pagamento *
               </label>
               <div className="space-y-3">
-                <label className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label className={`flex items-center space-x-4 p-4 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
+                  customer.paymentMethod === "cartao" 
+                    ? "border-primary-500 bg-primary-50" 
+                    : "border-gray-200 hover:border-primary-200 hover:bg-primary-25"
+                }`}>
                   <input
                     type="radio"
                     name="payment"
@@ -395,16 +424,25 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                     onChange={(e) =>
                       setCustomer({
                         ...customer,
-                        paymentMethod: e.target.value as any,
+                        paymentMethod: e.target.value as "cartao" | "pix" | "dinheiro",
                       })
                     }
-                    className="text-red-600"
+                    className="w-5 h-5 text-primary-600 focus:ring-primary-500"
                   />
-                  <CreditCard className="h-5 w-5 text-gray-600" />
-                  <span>Cartão (Débito/Crédito)</span>
+                  <div className="bg-blue-100 p-2 rounded-lg">
+                    <CreditCard className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-800">Cartão</div>
+                    <div className="text-sm text-gray-600">Débito ou Crédito</div>
+                  </div>
                 </label>
 
-                <label className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label className={`flex items-center space-x-4 p-4 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
+                  customer.paymentMethod === "pix" 
+                    ? "border-primary-500 bg-primary-50" 
+                    : "border-gray-200 hover:border-primary-200 hover:bg-primary-25"
+                }`}>
                   <input
                     type="radio"
                     name="payment"
@@ -413,16 +451,25 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                     onChange={(e) =>
                       setCustomer({
                         ...customer,
-                        paymentMethod: e.target.value as any,
+                        paymentMethod: e.target.value as "cartao" | "pix" | "dinheiro",
                       })
                     }
-                    className="text-red-600"
+                    className="w-5 h-5 text-primary-600 focus:ring-primary-500"
                   />
-                  <Banknote className="h-5 w-5 text-gray-600" />
-                  <span>PIX</span>
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <Banknote className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-800">PIX</div>
+                    <div className="text-sm text-gray-600">Transferência instantânea</div>
+                  </div>
                 </label>
 
-                <label className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label className={`flex items-center space-x-4 p-4 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
+                  customer.paymentMethod === "dinheiro" 
+                    ? "border-primary-500 bg-primary-50" 
+                    : "border-gray-200 hover:border-primary-200 hover:bg-primary-25"
+                }`}>
                   <input
                     type="radio"
                     name="payment"
@@ -431,20 +478,26 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                     onChange={(e) =>
                       setCustomer({
                         ...customer,
-                        paymentMethod: e.target.value as any,
+                        paymentMethod: e.target.value as "cartao" | "pix" | "dinheiro",
                       })
                     }
-                    className="text-red-600"
+                    className="w-5 h-5 text-primary-600 focus:ring-primary-500"
                   />
-                  <DollarSign className="h-5 w-5 text-gray-600" />
-                  <span>Dinheiro</span>
+                  <div className="bg-yellow-100 p-2 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-yellow-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-800">Dinheiro</div>
+                    <div className="text-sm text-gray-600">Pagamento na entrega</div>
+                  </div>
                 </label>
               </div>
             </div>
 
             {customer.paymentMethod === "dinheiro" && (
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
+              <div className="card-elegant p-6 border-2 border-yellow-200">
+                <label className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                  <span className="mr-2">💵</span>
                   Troco para quanto? *
                 </label>
                 <input
@@ -459,38 +512,44 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                       changeFor: parseFloat(e.target.value),
                     })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  placeholder="0.00"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300"
+                  placeholder={`Valor mínimo: R$ ${(state.total + (customer.deliveryFee || 0)).toFixed(2)}`}
                 />
+                <p className="text-xs text-gray-600 mt-2">
+                  💡 Informe um valor maior que o total do pedido para facilitar o troco
+                </p>
               </div>
             )}
           </div>
 
           {/* Total do Pedido */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="font-semibold text-gray-800 mb-3">
-              Resumo do Pedido
+          <div className="card-elegant p-6 border-2 border-primary-200">
+            <h3 className="font-display font-bold text-gray-800 mb-4 flex items-center">
+              🧾 Resumo do Pedido
             </h3>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Subtotal:</span>
-                <span className="font-semibold">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-gray-600">
+                <span>Subtotal ({state.items.length} {state.items.length === 1 ? 'item' : 'itens'}):</span>
+                <span className="font-semibold text-lg">
                   R$ {state.total.toFixed(2)}
                 </span>
               </div>
               {customer.deliveryType === "entrega" && (
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Taxa de Entrega:</span>
-                  <span className="font-semibold text-red-600">
-                    R$ {customer.deliveryFee?.toFixed(2)}
+                <div className="flex justify-between items-center text-gray-600">
+                  <span className="flex items-center">
+                    <span className="mr-1">🚚</span>
+                    Taxa de Entrega:
+                  </span>
+                  <span className="font-semibold text-primary-600">
+                    R$ {(customer.deliveryFee || 0).toFixed(2)}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between items-center border-t pt-2">
-                <span className="text-lg font-semibold text-gray-800">
-                  Total:
+              <div className="flex justify-between items-center border-t border-gray-200 pt-3">
+                <span className="text-xl font-display font-bold text-gray-800">
+                  Total Final:
                 </span>
-                <span className="text-2xl font-bold text-red-600">
+                <span className="text-3xl font-display font-bold gradient-text">
                   R$ {(state.total + (customer.deliveryFee || 0)).toFixed(2)}
                 </span>
               </div>
@@ -501,9 +560,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
             type="button"
             onClick={handleFinalizeClick}
             disabled={!isFormValid()}
-            className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white py-4 rounded-lg font-semibold transition-colors"
+            className="w-full btn-primary py-5 text-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-elegant hover:shadow-xl"
           >
-            Finalizar Pedido
+            <span className="flex items-center justify-center space-x-3">
+              <span>🛒</span>
+              <span>Finalizar Pedido</span>
+              <span className="text-lg">→</span>
+            </span>
           </button>
 
           {showOrderSummary && (
@@ -664,7 +727,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onBack, onClose }) => {
                               Taxa de Entrega:
                             </span>
                             <span className="font-semibold text-red-600">
-                              R$ {customer.deliveryFee.toFixed(2)}
+                              R$ {(customer.deliveryFee || 0).toFixed(2)}
                             </span>
                           </div>
                         )}

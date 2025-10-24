@@ -1,8 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Animações para notificações */
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv02','cv03','cv04','cv11';
+    background: linear-gradient(135deg, #fef9f3 0%, #fdf2e9 100%);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium px-6 py-3 rounded-xl 
+           transition-all duration-300 shadow-card hover:shadow-card-hover transform hover:-translate-y-0.5;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-100 hover:bg-secondary-200 text-secondary-800 font-medium px-6 py-3 rounded-xl 
+           transition-all duration-300 border border-secondary-200 hover:border-secondary-300;
+  }
+
+  .card-elegant {
+    @apply bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 
+           border border-gray-100 overflow-hidden;
+  }
+
+  .gradient-bg {
+    background: linear-gradient(135deg, #fef9f3 0%, #fdf2e9 50%, #fcf6f0 100%);
+  }
+
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-elegant;
+  }
+}
+
+/* Animações personalizadas */
 @keyframes slide-in-from-right {
   from {
     transform: translateX(100%);
@@ -25,6 +65,15 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
 .animate-in {
   animation: slide-in-from-right 0.3s ease-out;
 }
@@ -33,14 +82,43 @@
   animation: slide-out-to-right 0.3s ease-in;
 }
 
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Scrollbar customizada */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 124, 0, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(245, 124, 0, 0.3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 124, 0, 0.5);
+}
+
 /* Estilos para scroll horizontal sem barra de rolagem */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
 }
 
 /* Melhorar a experiência de scroll no mobile */
@@ -48,4 +126,21 @@
   .scrollbar-hide {
     scroll-behavior: smooth;
   }
+}
+
+/* Efeito de hover suave para botões */
+.btn-hover {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.btn-hover:hover {
+  transform: translateY(-2px);
+}
+
+/* Gradiente para textos */
+.gradient-text {
+  background: linear-gradient(135deg, #f57c00, #ff8f00, #ff6f00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
