@@ -204,15 +204,7 @@ const Menu: React.FC = () => {
 
   return (
     <section className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
-        <h2 className="text-4xl font-display font-bold text-gray-800 mb-4">
-          Nosso Cardápio Especial
-        </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Deliciosas opções preparadas com ingredientes selecionados e todo o carinho da tradição brasileira
-        </p>
-        <div className="mt-4 w-24 h-1 bg-gradient-to-r from-primary-500 to-primary-600 mx-auto rounded-full"></div>
-      </div>
+
 
       {/* Filtros de Categoria */}
       <div className="mb-12">

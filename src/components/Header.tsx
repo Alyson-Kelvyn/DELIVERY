@@ -13,26 +13,6 @@ const Header: React.FC<HeaderProps> = ({ onCartClick }) => {
 
   return (
     <header className="glass-effect sticky top-0 z-50 border-b border-primary-100">
-      {/* Top bar com informações */}
-      <div className="bg-primary-600 text-white py-2">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <Phone className="h-3 w-3" />
-                <span>(11) 99999-9999</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Clock className="h-3 w-3" />
-                <span>Seg-Dom: 11h às 23h</span>
-              </div>
-            </div>
-            <div className="hidden md:block">
-              <span className="font-medium">🚚 Entrega GRÁTIS acima de R$ 30,00</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Header principal */}
       <div className="container mx-auto px-4 py-4">
@@ -45,9 +25,7 @@ const Header: React.FC<HeaderProps> = ({ onCartClick }) => {
               <h1 className="text-2xl font-display font-bold gradient-text">
                 ChurrascoDelivery
               </h1>
-              <p className="text-secondary-600 text-sm font-medium">
-                ✨ Sabor autêntico que aquece o coração
-              </p>
+
             </div>
           </div>
           

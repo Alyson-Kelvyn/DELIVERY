@@ -709,7 +709,7 @@ const Products: React.FC = () => {
             <div className="p-6">
               {/* Categoria */}
               <div className="flex items-center mb-3">
-                <span className="text-sm bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-medium flex items-center gap-1">
+                <span className="text-sm bg-primary-100 text-primary-800 px-3 py-1 rounded-full font-medium flex items-center gap-1">
                   <span>{getCategoryIcon(product.category)}</span>
                   {getCategoryLabel(product.category)}
                 </span>
@@ -738,7 +738,7 @@ const Products: React.FC = () => {
                       className={`text-sm font-medium ${
                         product.stock > 0
                           ? product.stock <= 5
-                            ? "text-orange-600"
+                            ? "text-primary-600"
                             : "text-green-600"
                           : "text-red-600"
                       }`}

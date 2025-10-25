@@ -7,7 +7,7 @@
   body {
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: 'cv02','cv03','cv04','cv11';
-    background: linear-gradient(135deg, #fef9f3 0%, #fdf2e9 100%);
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
     min-height: 100vh;
   }
 
@@ -34,7 +34,7 @@
   }
 
   .gradient-bg {
-    background: linear-gradient(135deg, #fef9f3 0%, #fdf2e9 50%, #fcf6f0 100%);
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 50%, #bcccdc 100%);
   }
 
   .glass-effect {
@@ -91,7 +91,7 @@
 /* Scrollbar customizada */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(245, 124, 0, 0.3) transparent;
+  scrollbar-color: rgba(98, 125, 152, 0.3) transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -103,12 +103,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(245, 124, 0, 0.3);
+  background: rgba(98, 125, 152, 0.3);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 124, 0, 0.5);
+  background: rgba(98, 125, 152, 0.5);
 }
 
 /* Estilos para scroll horizontal sem barra de rolagem */
@@ -139,7 +139,7 @@
 
 /* Gradiente para textos */
 .gradient-text {
-  background: linear-gradient(135deg, #f57c00, #ff8f00, #ff6f00);
+  background: linear-gradient(135deg, #627d98, #486581, #334e68);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

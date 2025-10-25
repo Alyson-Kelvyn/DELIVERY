@@ -49,7 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const getStockColor = (stock: number) => {
     if (stock > 5) return "text-green-600";
-    if (stock > 0) return "text-orange-600";
+    if (stock > 0) return "text-primary-600";
     return "text-red-600";
   };
 
@@ -127,7 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               R$ {product.price.toFixed(2)}
             </span>
             {hasStockControl && availableStock <= 3 && availableStock > 0 && (
-              <span className="text-xs text-orange-600 font-medium">
+              <span className="text-xs text-primary-600 font-medium">
                 ⚠️ Últimas unidades!
               </span>
             )}

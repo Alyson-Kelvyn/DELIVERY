@@ -168,11 +168,11 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">Pedidos Hoje</p>
-              <p className="text-2xl font-bold text-orange-600">
+              <p className="text-2xl font-bold text-primary-600">
                 {stats.dailyOrders}
               </p>
             </div>
-            <ShoppingBag className="h-8 w-8 text-orange-600" />
+            <ShoppingBag className="h-8 w-8 text-primary-600" />
           </div>
         </div>
 
