@@ -55,7 +55,7 @@ const Header: React.FC<HeaderProps> = ({ onCartClick }) => {
             onClick={onCartClick}
             className="relative group bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 p-4 rounded-2xl transition-all duration-300 shadow-card hover:shadow-card-hover transform hover:-translate-y-1"
           >
-            <ShoppingCart className="h-6 w-6 text-white" />
+            <ShoppingCart className="h-6 w-6 text-gray" />
             {itemCount > 0 && (
               <>
                 <span className="absolute -top-2 -right-2 bg-accent-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-bounce-subtle">
