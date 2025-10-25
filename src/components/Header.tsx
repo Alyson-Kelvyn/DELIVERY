@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({ onCartClick }) => {
                 <span className="absolute -top-2 -right-2 bg-accent-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-bounce-subtle">
                   {itemCount}
                 </span>
-                <div className="absolute -bottom-12 right-0 bg-gray-900 text-white text-xs font-medium px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                <div className="absolute -bottom-12 right-0 bg-gray-900 text-gray text-xs font-medium px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                   R$ {totalValue.toFixed(2)}
                 </div>
               </>
