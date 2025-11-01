@@ -64,11 +64,35 @@ const AdminApp: React.FC = () => {
       case "dashboard":
         return <Dashboard />;
       case "orders":
-        return <Orders />;
+        return <Orders onNavigateSection={setActiveSection} />;
+      case "orders-pendente":
+        return (
+          <Orders
+            defaultFilter="pendente"
+            section="pendente"
+            onNavigateSection={setActiveSection}
+          />
+        );
+      case "orders-confirmado":
+        return (
+          <Orders
+            defaultFilter="confirmado"
+            section="confirmado"
+            onNavigateSection={setActiveSection}
+          />
+        );
+      case "orders-entregue":
+        return (
+          <Orders
+            defaultFilter="entregue"
+            section="entregue"
+            onNavigateSection={setActiveSection}
+          />
+        );
       case "products":
         return <Products />;
       default:
-        return <Orders />;
+        return <Orders onNavigateSection={setActiveSection} />;
     }
   };
 

@@ -144,3 +144,11 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Safe-area helpers para iOS/Android (notch) */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}

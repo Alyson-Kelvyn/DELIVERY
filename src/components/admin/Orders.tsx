@@ -2,18 +2,38 @@ import React, { useState, useEffect } from "react";
 import { CheckCircle, Clock, Truck, Calendar, X } from "lucide-react";
 import { Order } from "../../types";
 import { supabase } from "../../lib/supabase";
+import {
+  sendOrderConfirmedToCustomer,
+  sendOrderReadyToCustomer,
+} from "../../utils/whatsapp";
 
-const Orders: React.FC = () => {
+interface OrdersProps {
+  defaultFilter?: "todos" | "pendente" | "confirmado" | "entregue" | "cancelado";
+  // seção atual para decidir navegação automática após ação
+  section?: "all" | "pendente" | "confirmado" | "entregue";
+  onNavigateSection?: (sectionId: string) => void;
+}
+
+const Orders: React.FC<OrdersProps> = ({
+  defaultFilter = "todos",
+  section = "all",
+  onNavigateSection,
+}) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<
     "todos" | "pendente" | "confirmado" | "entregue" | "cancelado"
-  >("todos");
+  >(defaultFilter);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
   useEffect(() => {
     fetchTodayOrders();
   }, []);
+
+  // Atualiza o filtro quando vier de uma seção específica
+  useEffect(() => {
+    setStatusFilter(defaultFilter);
+  }, [defaultFilter]);
 
   // Fechar dropdown quando clicar fora
   useEffect(() => {
@@ -226,18 +246,18 @@ const Orders: React.FC = () => {
   };
 
   const updateOrderStatus = async (
-    orderId: string,
+    order: Order,
     newStatus: Order["status"]
   ) => {
     try {
       console.log(
-        `Tentando atualizar pedido ${orderId} para status: ${newStatus}`
+        `Tentando atualizar pedido ${order.id} para status: ${newStatus}`
       );
 
       const { error } = await supabase
         .from("orders")
         .update({ status: newStatus })
-        .eq("id", orderId);
+        .eq("id", order.id);
 
       if (error) {
         console.error("Error updating order:", error);
@@ -246,15 +266,30 @@ const Orders: React.FC = () => {
       }
 
       console.log(
-        `Pedido ${orderId} atualizado com sucesso para: ${newStatus}`
+        `Pedido ${order.id} atualizado com sucesso para: ${newStatus}`
       );
 
       // Update local state
       setOrders(
-        orders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
+        orders.map((o) => (o.id === order.id ? { ...o, status: newStatus } : o))
       );
+
+      // Enviar mensagem ao cliente conforme a ação
+      if (newStatus === "confirmado") {
+        sendOrderConfirmedToCustomer(order);
+        // Se estamos na seção de pendentes, navegar para confirmados
+        if (section === "pendente") {
+          onNavigateSection?.("orders-confirmado");
+        }
+      }
+
+      if (newStatus === "entregue") {
+        sendOrderReadyToCustomer(order);
+        // Se estamos na seção de confirmados, navegar para finalizados
+        if (section === "confirmado") {
+          onNavigateSection?.("orders-entregue");
+        }
+      }
     } catch (error) {
       console.error("Error:", error);
       alert(`Erro inesperado: ${error}`);
@@ -599,15 +634,13 @@ const Orders: React.FC = () => {
                   {order.status === "pendente" && (
                     <>
                       <button
-                        onClick={() =>
-                          updateOrderStatus(order.id, "confirmado")
-                        }
+                        onClick={() => updateOrderStatus(order, "confirmado")}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
                       >
                         Confirmar
                       </button>
                       <button
-                        onClick={() => updateOrderStatus(order.id, "cancelado")}
+                        onClick={() => updateOrderStatus(order, "cancelado")}
                         className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
                       >
                         Cancelar
@@ -617,13 +650,13 @@ const Orders: React.FC = () => {
                   {order.status === "confirmado" && (
                     <>
                       <button
-                        onClick={() => updateOrderStatus(order.id, "entregue")}
+                        onClick={() => updateOrderStatus(order, "entregue")}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
                       >
-                        Entregar
+                        Finalizar
                       </button>
                       <button
-                        onClick={() => updateOrderStatus(order.id, "cancelado")}
+                        onClick={() => updateOrderStatus(order, "cancelado")}
                         className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow transition-colors"
                       >
                         Cancelar

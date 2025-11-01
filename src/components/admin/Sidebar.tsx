@@ -1,5 +1,5 @@
 import React from "react";
-import { BarChart3, Package, ShoppingBag, LogOut, ChefHat } from "lucide-react";
+import { BarChart3, Package, ShoppingBag, LogOut, ChefHat, ListChecks, CheckCheck, Clock } from "lucide-react";
 
 interface SidebarProps {
   activeSection: string;
@@ -14,6 +14,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const menuItems = [
     { id: "orders", icon: ShoppingBag, label: "Pedidos do Dia" },
+    { id: "orders-pendente", icon: Clock, label: "Pedidos Pendentes" },
+    { id: "orders-confirmado", icon: ListChecks, label: "Pedidos Confirmados" },
+    { id: "orders-entregue", icon: CheckCheck, label: "Pedidos Finalizados" },
     { id: "dashboard", icon: BarChart3, label: "Dashboard" },
     { id: "products", icon: Package, label: "Produtos" },
   ];
