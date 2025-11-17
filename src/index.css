@@ -152,3 +152,11 @@
 .safe-top {
   padding-top: env(safe-area-inset-top);
 }
+
+/* Classe para truncar texto em múltiplas linhas */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

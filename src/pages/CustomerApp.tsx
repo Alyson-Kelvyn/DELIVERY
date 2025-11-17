@@ -7,7 +7,7 @@ const CustomerApp: React.FC = () => {
   const [showCart, setShowCart] = useState(false);
 
   return (
-    <div className="min-h-screen gradient-bg">
+    <div className="min-h-screen bg-gray-50">
       <Header onCartClick={() => setShowCart(true)} />
       <Menu />
       <Cart isOpen={showCart} onClose={() => setShowCart(false)} />

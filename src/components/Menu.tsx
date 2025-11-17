@@ -165,34 +165,34 @@ const Menu: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="container mx-auto px-4 py-12">
-        {/* Loading header */}
-        <div className="text-center mb-12">
-          <div className="h-10 bg-gray-200 rounded-lg w-80 mx-auto mb-4 shimmer"></div>
-          <div className="h-6 bg-gray-200 rounded-lg w-96 mx-auto shimmer"></div>
-        </div>
-
+      <section className="bg-gray-50 min-h-screen">
         {/* Loading categories */}
-        <div className="mb-12 flex justify-center gap-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-12 w-28 bg-gray-200 rounded-2xl shimmer"></div>
-          ))}
+        <div className="bg-white sticky top-0 z-10 shadow-sm">
+          <div className="container mx-auto px-0">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-12 w-24 bg-gray-200 shimmer border-b-2 border-gray-200"></div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Loading products */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="container mx-auto px-4 py-6 space-y-4">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="card-elegant overflow-hidden">
-              <div className="h-64 bg-gray-200 shimmer"></div>
-              <div className="p-6 space-y-4">
-                <div className="h-6 bg-gray-200 rounded w-3/4 shimmer"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-full shimmer"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3 shimmer"></div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="h-8 bg-gray-200 rounded w-1/3 shimmer"></div>
-                  <div className="h-10 bg-gray-200 rounded w-1/3 shimmer"></div>
+            <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="flex">
+                <div className="w-32 h-32 bg-gray-200 shimmer"></div>
+                <div className="flex-1 p-4 space-y-3">
+                  <div className="h-6 bg-gray-200 rounded w-3/4 shimmer"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-full shimmer"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3 shimmer"></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-6 bg-gray-200 rounded w-1/4 shimmer"></div>
+                    <div className="h-8 bg-gray-200 rounded w-16 shimmer"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -203,54 +203,50 @@ const Menu: React.FC = () => {
   }
 
   return (
-    <section className="container mx-auto px-4 py-12">
-
-
-      {/* Filtros de Categoria */}
-      <div className="mb-12">
-        <div className="relative">
-          <div className="flex overflow-x-auto scrollbar-hide pb-4 md:flex-wrap md:justify-center gap-3 px-4 md:px-0">
+    <section className="bg-gray-50 min-h-screen">
+      {/* Filtros de Categoria - Estilo abas horizontais */}
+      <div className="bg-white sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto px-0">
+          <div className="flex overflow-x-auto scrollbar-hide">
             {categories.map((category) => (
               <button
                 key={category.value}
                 onClick={() => setSelectedCategory(category.value)}
-                className={`flex-shrink-0 px-6 py-3 rounded-2xl text-sm font-medium transition-all duration-300 whitespace-nowrap btn-hover ${
+                className={`flex-shrink-0 px-6 py-4 text-sm font-medium transition-all duration-300 whitespace-nowrap border-b-2 ${
                   selectedCategory === category.value
-                    ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-elegant"
-                    : "glass-effect text-gray-700 hover:bg-white hover:shadow-card"
+                    ? "text-red-600 border-red-600 bg-red-50"
+                    : "text-gray-600 border-transparent hover:text-red-600 hover:bg-red-50"
                 }`}
               >
-                <span className="mr-2 text-lg">{category.icon}</span>
                 {category.label}
               </button>
             ))}
           </div>
-
-          {/* Indicadores visuais de scroll no mobile */}
-          <div className="md:hidden absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white via-white to-transparent pointer-events-none"></div>
-          <div className="md:hidden absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white via-white to-transparent pointer-events-none"></div>
         </div>
       </div>
 
-      {filteredProducts.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="glass-effect max-w-md mx-auto p-8 rounded-3xl">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-display font-semibold text-gray-800 mb-2">
-              Nenhum produto encontrado
-            </h3>
-            <p className="text-gray-600">
-              Não há produtos disponíveis nesta categoria no momento
-            </p>
+      {/* Lista de Produtos */}
+      <div className="container mx-auto px-4 py-6">
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="bg-white max-w-md mx-auto p-8 rounded-2xl shadow-sm">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                Nenhum produto encontrado
+              </h3>
+              <p className="text-gray-600">
+                Não há produtos disponíveis nesta categoria no momento
+              </p>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
+        ) : (
+          <div className="space-y-4">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 };
