@@ -7,8 +7,7 @@ type Category =
   | "todos"
   | "marmitas"
   | "bebidas"
-  | "sobremesas"
-  | "acompanhamentos";
+  | "sobremesas";
 
 const Menu: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -30,108 +29,6 @@ const Menu: React.FC = () => {
       if (error) {
         console.error("Error fetching products:", error);
         // Fallback data for demo
-        setProducts([
-          {
-            id: "1",
-            name: "Marmita de Picanha",
-            description:
-              "Deliciosa picanha grelhada com arroz, feijão, farofa e vinagrete",
-            price: 18.9,
-            image_url:
-              "https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            stock: 15,
-            category: "marmitas",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "2",
-            name: "Marmita de Maminha",
-            description:
-              "Suculenta maminha na brasa com acompanhamentos tradicionais",
-            price: 16.9,
-            image_url:
-              "https://images.pexels.com/photos/2491273/pexels-photo-2491273.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            stock: 8,
-            category: "marmitas",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "3",
-            name: "Marmita de Fraldinha",
-            description:
-              "Fraldinha temperada na medida certa com todos os acompanhamentos",
-            price: 15.9,
-            image_url:
-              "https://images.pexels.com/photos/1640772/pexels-photo-1640772.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            stock: 3,
-            category: "marmitas",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "4",
-            name: "Marmita de Costela",
-            description: "Costela bovina assada lentamente, derretendo na boca",
-            price: 19.9,
-            image_url:
-              "https://images.pexels.com/photos/1251198/pexels-photo-1251198.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            stock: 0,
-            category: "marmitas",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "5",
-            name: "Marmita de Linguiça",
-            description: "Linguiça artesanal grelhada com temperos especiais",
-            price: 13.9,
-            image_url:
-              "https://images.pexels.com/photos/248444/pexels-photo-248444.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            stock: undefined,
-            category: "marmitas",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "6",
-            name: "Marmita de Alcatra",
-            description:
-              "Alcatra macia e suculenta com o sabor inconfundível do churrasco",
-            price: 17.9,
-            image_url:
-              "https://images.pexels.com/photos/1409050/pexels-photo-1409050.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            stock: 12,
-            category: "marmitas",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "7",
-            name: "Refrigerante Coca-Cola 350ml",
-            description: "Refrigerante Coca-Cola gelado",
-            price: 4.5,
-            image_url:
-              "https://images.pexels.com/photos/1627763/pexels-photo-1627763.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            stock: 25,
-            category: "bebidas",
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "8",
-            name: "Pudim de Leite",
-            description: "Pudim de leite caseiro com calda de caramelo",
-            price: 8.0,
-            image_url:
-              "https://images.pexels.com/photos/162553/pexels-photo-162553.jpeg?auto=compress&cs=tinysrgb&w=500",
-            available: true,
-            stock: 0,
-            category: "sobremesas",
-            created_at: new Date().toISOString(),
-          },
-        ]);
       } else {
         // Filtrar produtos que estão disponíveis E (não têm controle de estoque OU têm estoque > 0)
         const filteredData = (data || []).filter(
@@ -152,15 +49,14 @@ const Menu: React.FC = () => {
 
   const filteredProducts =
     selectedCategory === "todos"
-      ? products
+      ? products.filter((p) => p.category !== "acompanhamentos")
       : products.filter((product) => product.category === selectedCategory);
 
-  const categories: { value: Category; label: string; icon: string }[] = [
-    { value: "todos", label: "Todos", icon: "🍽️" },
-    { value: "marmitas", label: "Marmitas", icon: "🥘" },
-    { value: "bebidas", label: "Bebidas", icon: "🥤" },
-    { value: "sobremesas", label: "Sobremesas", icon: "🍰" },
-    { value: "acompanhamentos", label: "Acompanhamentos", icon: "🥗" },
+  const categories: { value: Category; label: string }[] = [
+    { value: "todos", label: "Todos" },
+    { value: "marmitas", label: "Marmitas" },
+    { value: "bebidas", label: "Bebidas" },
+    { value: "sobremesas", label: "Sobremesas" },
   ];
 
   if (loading) {
@@ -239,7 +135,32 @@ const Menu: React.FC = () => {
               </p>
             </div>
           </div>
+        ) : selectedCategory === "todos" ? (
+          // Agrupado por categoria quando "Todos" está selecionado
+          <div className="space-y-10">
+            {categories
+              .filter((c) => c.value !== "todos")
+              .map((cat) => {
+                const items = products.filter(
+                  (p) => p.category === cat.value
+                );
+                if (items.length === 0) return null;
+                return (
+                  <div key={cat.value} id={`sec-${cat.value}`} className="scroll-mt-20">
+                    <h2 className="text-2xl font-extrabold text-gray-900 mb-4">
+                      {cat.label}
+                    </h2>
+                    <div className="space-y-4">
+                      {items.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
         ) : (
+          // Lista simples quando uma categoria específica está selecionada
           <div className="space-y-4">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />

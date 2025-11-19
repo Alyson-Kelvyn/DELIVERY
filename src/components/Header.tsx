@@ -12,7 +12,7 @@ const Header: React.FC<HeaderProps> = ({ onCartClick }) => {
   const totalValue = state.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
   return (
-    <header className="glass-effect sticky top-0 z-50 border-b border-primary-100">
+    <header className="glass-effect border-b border-primary-100">
 
       {/* Header principal */}
       <div className="container mx-auto px-4 py-4">

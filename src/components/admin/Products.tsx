@@ -67,7 +67,9 @@ const Products: React.FC = () => {
           "error"
         );
       } else {
-        setProducts(data || []);
+        // Filtra acompanhamentos para não aparecer na lista de produtos
+        const filtered = (data || []).filter((p) => p.category !== "acompanhamentos");
+        setProducts(filtered);
       }
     } catch (error) {
       console.error("Error:", error);

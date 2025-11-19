@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import { Product } from "../types";
 import { useCart } from "../context/CartContext";
+import ComplementModal from "./ComplementModal";
 
 interface ProductCardProps {
   product: Product;
@@ -9,6 +10,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { state, dispatch } = useCart();
+  const [openComplement, setOpenComplement] = useState(false);
 
   const cartItem = state.items.find((item) => item.product.id === product.id);
   const quantity = cartItem?.quantity || 0;
@@ -17,20 +19,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const hasStockControl = product.stock !== null && product.stock !== undefined;
   const availableStock = hasStockControl ? product.stock! : 0;
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "marmitas":
-        return "🥘";
-      case "bebidas":
-        return "🥤";
-      case "sobremesas":
-        return "🍰";
-      case "acompanhamentos":
-        return "🥗";
-      default:
-        return "🍽️";
-    }
-  };
 
   const getStockColor = (stock: number) => {
     if (stock > 5) return "text-green-600";
@@ -44,7 +32,28 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (hasStockControl && availableStock <= 0) {
       return; // Não permitir adicionar se não há estoque
     }
-    dispatch({ type: "ADD_ITEM", payload: product });
+    // Em vez de adicionar direto, abre modal de complementos
+    setOpenComplement(true);
+  };
+
+  const handleConfirmComplement = (data: { selectedComplements: Product[]; observation?: string }) => {
+    // Converte complementos para o formato correto com quantidade
+    const complementsWithQuantity = data.selectedComplements.map(comp => ({
+      product: comp,
+      quantity: 1
+    }));
+
+    // Adiciona o produto com complementos e observação
+    dispatch({ 
+      type: "ADD_ITEM_WITH_COMPLEMENTS", 
+      payload: { 
+        product, 
+        complements: complementsWithQuantity,
+        observation: data.observation?.trim()
+      } 
+    });
+
+    setOpenComplement(false);
   };
 
   const updateQuantity = (newQuantity: number) => {
@@ -73,11 +82,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             alt={product.name}
             className="w-full h-full object-cover"
           />
-          
-          {/* Badge de categoria */}
-          <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-medium">
-            {getCategoryIcon(product.category)}
-          </div>
+
         </div>
 
         {/* Informações do produto */}
@@ -150,6 +155,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
         </div>
       </div>
+      <ComplementModal
+        open={openComplement}
+        product={product}
+        onClose={() => setOpenComplement(false)}
+        onConfirm={handleConfirmComplement}
+      />
     </div>
   );
 };

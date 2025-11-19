@@ -4,6 +4,8 @@ import Sidebar from "../components/admin/Sidebar";
 import Dashboard from "../components/admin/Dashboard";
 import Orders from "../components/admin/Orders";
 import Products from "../components/admin/Products";
+import Complements from "../components/admin/Complements";
+import CategoryComplements from "../components/admin/CategoryComplements";
 import { signOut, getCurrentUser } from "../lib/supabase";
 import { Menu, X } from "lucide-react";
 
@@ -91,6 +93,10 @@ const AdminApp: React.FC = () => {
         );
       case "products":
         return <Products />;
+      case "complements":
+        return <Complements />;
+      case "category-complements":
+        return <CategoryComplements />;
       default:
         return <Orders onNavigateSection={setActiveSection} />;
     }
@@ -131,10 +137,6 @@ const AdminApp: React.FC = () => {
           onSectionChange={(section) => {
             setActiveSection(section);
             setShowSidebar(false); // Fecha o menu ao selecionar no mobile
-          }}
-          onLogout={() => {
-            handleLogout();
-            setShowSidebar(false);
           }}
         />
       </div>

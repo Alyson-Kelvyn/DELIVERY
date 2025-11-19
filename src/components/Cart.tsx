@@ -147,6 +147,18 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                       <p className="gradient-text font-bold text-base md:text-lg">
                         R$ {item.product.price.toFixed(2)}
                       </p>
+                      
+                      {/* Complementos */}
+                      {item.complements && item.complements.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {item.complements.map((comp, idx) => (
+                            <div key={idx} className="text-xs text-gray-600 flex items-center justify-between bg-gray-50 px-2 py-1 rounded">
+                              <span>+ {comp.product.name}</span>
+                              <span className="font-semibold text-gray-700">R$ {comp.product.price.toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -235,10 +247,16 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                     </div>
                     <div className="text-right">
                       <div className="text-xl md:text-2xl font-display font-bold gradient-text">
-                        R$ {(item.product.price * item.quantity).toFixed(2)}
+                        R$ {(
+                          (item.product.price * item.quantity) + 
+                          ((item.complements || []).reduce((sum, comp) => sum + (comp.product.price * comp.quantity), 0))
+                        ).toFixed(2)}
                       </div>
                       <div className="text-[10px] md:text-xs text-gray-500">
-                        {item.quantity}x R$ {item.product.price.toFixed(2)}
+                        {item.quantity}x R$ {(
+                          item.product.price + 
+                          ((item.complements || []).reduce((sum, comp) => sum + comp.product.price, 0))
+                        ).toFixed(2)}
                       </div>
                     </div>
                   </div>

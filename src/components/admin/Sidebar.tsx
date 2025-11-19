@@ -1,24 +1,23 @@
 import React from "react";
-import { BarChart3, Package, ShoppingBag, LogOut, ChefHat, ListChecks, CheckCheck, Clock } from "lucide-react";
+import { BarChart3, Package, ShoppingBag, ChefHat, ListChecks, CheckCheck, Clock, ListPlus } from "lucide-react";
 
 interface SidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
-  onLogout: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onSectionChange,
-  onLogout,
 }) => {
   const menuItems = [
     { id: "orders", icon: ShoppingBag, label: "Pedidos do Dia" },
-    { id: "orders-pendente", icon: Clock, label: "Pedidos Pendentes" },
-    { id: "orders-confirmado", icon: ListChecks, label: "Pedidos Confirmados" },
-    { id: "orders-entregue", icon: CheckCheck, label: "Pedidos Finalizados" },
+    { id: "orders-pendente", icon: Clock, label: "Pendentes" },
+    { id: "orders-confirmado", icon: ListChecks, label: "Confirmados" },
+    { id: "orders-entregue", icon: CheckCheck, label: "Finalizados" },
     { id: "dashboard", icon: BarChart3, label: "Dashboard" },
     { id: "products", icon: Package, label: "Produtos" },
+    { id: "complements", icon: ListPlus, label: "Complementos" },
   ];
 
   return (
@@ -53,16 +52,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </nav>
-
-      <div className="absolute bottom-4 left-4 right-4">
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
-        >
-          <LogOut className="h-5 w-5" />
-          <span>Sair</span>
-        </button>
-      </div>
     </div>
   );
 };

@@ -14,6 +14,7 @@ export interface CartItem {
   product: Product;
   quantity: number;
   observation?: string; // Observação opcional para o produto
+  complements?: Array<{ product: Product; quantity: number }>; // Complementos do produto
 }
 
 export interface Customer {

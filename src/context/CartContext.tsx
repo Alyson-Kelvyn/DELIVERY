@@ -9,6 +9,7 @@ interface CartState {
 
 type CartAction =
   | { type: "ADD_ITEM"; payload: Product }
+  | { type: "ADD_ITEM_WITH_COMPLEMENTS"; payload: { product: Product; complements: Array<{ product: Product; quantity: number }>; observation?: string } }
   | { type: "REMOVE_ITEM"; payload: string }
   | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
   | { type: "UPDATE_OBSERVATION"; payload: { id: string; observation: string } }
@@ -22,6 +23,66 @@ const CartContext = createContext<{
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
+    case "ADD_ITEM_WITH_COMPLEMENTS": {
+      const existingItem = state.items.find(
+        (item) => item.product.id === action.payload.product.id
+      );
+
+      if (existingItem) {
+        // Se já existe, incrementa quantidade e adiciona complementos
+        const updatedItems = state.items.map((item) =>
+          item.product.id === action.payload.product.id
+            ? { 
+                ...item, 
+                quantity: item.quantity + 1,
+                observation: action.payload.observation || item.observation,
+                complements: action.payload.complements.length > 0 ? action.payload.complements : item.complements
+              }
+            : item
+        );
+        return {
+          ...state,
+          items: updatedItems,
+          total: updatedItems.reduce(
+            (sum, item) => {
+              const itemTotal = item.product.price * item.quantity;
+              const complementsTotal = (item.complements || []).reduce(
+                (compSum, comp) => compSum + (comp.product.price * comp.quantity),
+                0
+              );
+              return sum + itemTotal + complementsTotal;
+            },
+            0
+          ),
+        };
+      }
+
+      const newItems = [
+        ...state.items,
+        { 
+          product: action.payload.product, 
+          quantity: 1,
+          observation: action.payload.observation,
+          complements: action.payload.complements
+        },
+      ];
+      return {
+        ...state,
+        items: newItems,
+        total: newItems.reduce(
+          (sum, item) => {
+            const itemTotal = item.product.price * item.quantity;
+            const complementsTotal = (item.complements || []).reduce(
+              (compSum, comp) => compSum + (comp.product.price * comp.quantity),
+              0
+            );
+            return sum + itemTotal + complementsTotal;
+          },
+          0
+        ),
+      };
+    }
+
     case "ADD_ITEM": {
       const existingItem = state.items.find(
         (item) => item.product.id === action.payload.id
@@ -65,7 +126,14 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...state,
         items: newItems,
         total: newItems.reduce(
-          (sum, item) => sum + item.product.price * item.quantity,
+          (sum, item) => {
+            const itemTotal = item.product.price * item.quantity;
+            const complementsTotal = (item.complements || []).reduce(
+              (compSum, comp) => compSum + (comp.product.price * comp.quantity),
+              0
+            );
+            return sum + itemTotal + complementsTotal;
+          },
           0
         ),
       };
@@ -84,7 +152,14 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...state,
         items: updatedItems,
         total: updatedItems.reduce(
-          (sum, item) => sum + item.product.price * item.quantity,
+          (sum, item) => {
+            const itemTotal = item.product.price * item.quantity;
+            const complementsTotal = (item.complements || []).reduce(
+              (compSum, comp) => compSum + (comp.product.price * comp.quantity),
+              0
+            );
+            return sum + itemTotal + complementsTotal;
+          },
           0
         ),
       };
@@ -100,7 +175,14 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...state,
         items: updatedItems,
         total: updatedItems.reduce(
-          (sum, item) => sum + item.product.price * item.quantity,
+          (sum, item) => {
+            const itemTotal = item.product.price * item.quantity;
+            const complementsTotal = (item.complements || []).reduce(
+              (compSum, comp) => compSum + (comp.product.price * comp.quantity),
+              0
+            );
+            return sum + itemTotal + complementsTotal;
+          },
           0
         ),
       };
